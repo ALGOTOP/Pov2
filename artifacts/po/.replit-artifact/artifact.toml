@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Po"
+description = "An imported personal author and ghostwriter portfolio site with a cinematic hero reveal, credibility details, books, testimonials, speaking work, and contact footer."
+version = "1.0.0"
+id = "artifacts/po"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 18206
+
+[services.development]
+run = "pnpm --filter @workspace/po run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/po", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/po/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18206"
+BASE_PATH = "/"

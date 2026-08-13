@@ -1,0 +1,98 @@
+.section {
+  width: 100%;
+  background: #000000;
+  padding-top: 160px;
+  padding-bottom: 80px;
+  padding-left: clamp(20px, 3.3vw, 38px);
+  padding-right: clamp(20px, 3.3vw, 38px);
+}
+
+.inner {
+  width: 100%;
+  max-width: 55vw;
+  margin: 0;
+}
+
+.paragraph {
+  font-family: var(--font-neue-montreal), sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  line-height: 1.205;
+  letter-spacing: -0.02em;
+  color: #f5f5f5;
+  margin: 0;
+
+  /* Without these, the same font-weight 400 can render visibly heavier
+     in some browsers -- this is what keeps it looking as thin/light as
+     the reference instead of appearing bold. */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+
+  /* Mobile-first responsive scale -- see breakpoints below for
+     tablet / reference-desktop (1138px) / large-desktop values. */
+  font-size: clamp(25px, 7.5vw, 30px);
+}
+
+.paragraph + .paragraph {
+  margin-top: 40px;
+}
+
+/* 480-767px */
+@media (min-width: 480px) {
+  .paragraph {
+    font-size: clamp(27px, 7vw, 34px);
+  }
+}
+
+/* 768-1023px (tablet) */
+@media (min-width: 768px) {
+  .paragraph {
+    font-size: clamp(32px, 4.2vw, 40px);
+  }
+}
+
+/* 1024-1439px -- reference desktop width (~1138px) targets exactly 42px */
+@media (min-width: 1024px) {
+  .paragraph {
+    font-size: 42px;
+  }
+}
+
+/* 1440px+ -- large desktop */
+@media (min-width: 1440px) {
+  .paragraph {
+    font-size: clamp(40px, 2vw, 44px);
+  }
+}
+
+/* --- Line-cascade reveal ---
+   Each word starts hidden. When its paragraph gets data-revealed="true"
+   (paragraph scrolled into view), every word fades to full opacity --
+   but with a per-line transition-delay (assigned in JS from measured
+   line position), so lines cascade top-to-bottom within under 700ms
+   total, rather than the whole paragraph appearing simultaneously. */
+.word {
+  display: inline-block;
+  opacity: 0;
+  color: #f5f5f5;
+  white-space: pre-wrap;
+  transition: opacity var(--dur, 350ms) ease-out;
+  transition-delay: var(--delay, 0ms);
+}
+
+.paragraph[data-revealed="true"] .word {
+  opacity: 1;
+}
+
+/* Applied briefly to force an instant, transition-less hide when
+   scrolling back up past a paragraph toward the hero. */
+.noTransition .word {
+  transition: none !important;
+}
+
+.italic {
+  font-family: var(--font-neue-montreal), sans-serif;
+  font-weight: 400;
+  font-style: italic;
+}

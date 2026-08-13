@@ -1,0 +1,321 @@
+.section {
+  --star-color: #e63878;
+  --star-empty: rgba(230, 56, 120, 0.24);
+
+  width: 100%;
+  background: #000000;
+  color: #f5f5f5;
+
+  border-top: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.045);
+
+  padding: 88px 6.65vw 105px;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+.inner {
+  width: 100%;
+  max-width: 1250px;
+  margin: 0 auto;
+
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: clamp(55px, 8vw, 115px);
+
+  align-items: start;
+}
+
+.item {
+  min-width: 0;
+
+  opacity: 0;
+  transform: translateY(18px);
+
+  transition:
+    opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* =========================================================
+   UPWORK
+   ========================================================= */
+
+.badge {
+  display: block;
+
+  width: 84px;
+  height: 84px;
+
+  object-fit: contain;
+
+  margin: 0 0 27px 0;
+}
+
+.headline {
+  margin: 0 0 8px 0;
+
+  font-family: var(--font-neue-montreal), sans-serif;
+  font-size: clamp(25px, 2vw, 29px);
+  line-height: 1;
+  font-weight: 400;
+  letter-spacing: -0.035em;
+
+  color: #f5f5f5;
+}
+
+/* =========================================================
+   SHARED LABELS
+   ========================================================= */
+
+.eyebrow {
+  margin: 0 0 8px 0;
+
+  font-family: var(--font-neue-montreal), sans-serif;
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 400;
+  letter-spacing: 0.115em;
+  text-transform: uppercase;
+
+  color: rgba(245, 245, 245, 0.54);
+}
+
+.caption {
+  margin: 0;
+
+  font-family: var(--font-neue-montreal), sans-serif;
+  font-size: 14px;
+  line-height: 1.25;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+
+  color: rgba(245, 245, 245, 0.62);
+}
+
+/* =========================================================
+   AMAZON STARS
+   ========================================================= */
+
+.stars {
+  display: flex;
+  align-items: center;
+
+  width: fit-content;
+
+  gap: 5px;
+
+  height: 30px;
+  margin: 0 0 18px 0;
+}
+
+.star {
+  display: block;
+
+  width: 22px;
+  height: 22px;
+
+  flex: 0 0 22px;
+}
+
+/* =========================================================
+   NUMBERS
+   ========================================================= */
+
+.bigStat {
+  display: block;
+
+  margin: 0 0 8px 0;
+
+  font-family: var(--font-neue-montreal), sans-serif;
+  font-size: clamp(30px, 3vw, 42px);
+  line-height: 0.95;
+  font-weight: 400;
+  letter-spacing: -0.04em;
+
+  color: #f5f5f5;
+}
+
+/* Amazon 4.5 */
+.item:nth-child(2) .bigStat {
+  font-size: clamp(30px, 2.7vw, 38px);
+  letter-spacing: -0.035em;
+}
+
+/* =========================================================
+   COPIES SOLD
+   ========================================================= */
+
+.item:nth-child(3) .bigStat {
+  font-size: clamp(42px, 4vw, 56px);
+  line-height: 0.9;
+  letter-spacing: -0.045em;
+
+  margin: 0 0 14px 0;
+}
+
+.plus {
+  color: var(--star-color);
+
+  font-size: 0.82em;
+  line-height: 1;
+
+  margin-left: 1px;
+
+  position: relative;
+  top: -1px;
+}
+
+/* Pink line underneath 2,000+ */
+.rule {
+  width: 40px;
+  height: 2px;
+
+  margin: 0 0 18px 0;
+
+  background: var(--star-color);
+}
+
+/* =========================================================
+   LARGE DESKTOP
+   ========================================================= */
+
+@media (min-width: 1100px) {
+  .section {
+    padding-left: max(6.65vw, 70px);
+    padding-right: max(6.65vw, 70px);
+  }
+
+  .inner {
+    max-width: 1250px;
+  }
+}
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 900px) {
+  .section {
+    padding: 72px 40px 85px;
+  }
+
+  .inner {
+    column-gap: 45px;
+  }
+
+  .badge {
+    width: 76px;
+    height: 76px;
+
+    margin-bottom: 24px;
+  }
+
+  .headline {
+    font-size: 25px;
+  }
+
+  .item:nth-child(3) .bigStat {
+    font-size: 44px;
+  }
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+  .section {
+    padding: 65px 24px 75px;
+  }
+
+  .inner {
+    grid-template-columns: 1fr;
+    row-gap: 58px;
+  }
+
+  .item {
+    width: 100%;
+  }
+
+  .badge {
+    width: 78px;
+    height: 78px;
+
+    margin-bottom: 23px;
+  }
+
+  .headline {
+    font-size: 27px;
+  }
+
+  .stars {
+    margin-bottom: 16px;
+  }
+
+  .star {
+    width: 21px;
+    height: 21px;
+
+    flex-basis: 21px;
+  }
+
+  .item:nth-child(2) .bigStat {
+    font-size: 34px;
+  }
+
+  .item:nth-child(3) .bigStat {
+    font-size: 46px;
+  }
+}
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 420px) {
+  .section {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .inner {
+    row-gap: 52px;
+  }
+
+  .badge {
+    width: 72px;
+    height: 72px;
+  }
+
+  .headline {
+    font-size: 25px;
+  }
+
+  .caption {
+    font-size: 13px;
+  }
+
+  .item:nth-child(3) .bigStat {
+    font-size: 42px;
+  }
+}
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .item {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}

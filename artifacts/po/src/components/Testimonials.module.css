@@ -1,0 +1,387 @@
+.section {
+  width: 100%;
+  background: #000;
+  color: #fff;
+  overflow: hidden;
+  padding: 80px 0 150px;
+  font-family: var(--font-neue-montreal), Arial, sans-serif;
+}
+
+.header {
+  position: relative;
+  width: 100%;
+  min-height: 82px;
+  padding: 0 3.3vw;
+}
+
+.title {
+  margin: 0;
+  text-align: right;
+
+  font-family: var(--font-neue-montreal), Arial, sans-serif;
+  font-size: clamp(58px, 5.35vw, 104px);
+  line-height: 0.9;
+  font-weight: 400;
+  letter-spacing: -0.058em;
+
+  white-space: nowrap;
+}
+
+.controls {
+  position: absolute;
+  left: 3.3vw;
+  top: 4px;
+
+  display: flex;
+  gap: 11px;
+
+  z-index: 3;
+}
+
+.arrowButton {
+  appearance: none;
+
+  display: grid;
+  place-items: center;
+
+  width: 64px;
+  height: 64px;
+
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+
+  background: #24333a;
+  color: #fff;
+
+  cursor: pointer;
+
+  transition:
+    background-color 180ms ease,
+    transform 180ms ease;
+}
+
+.arrowButton:hover {
+  background: #2b3c44;
+  transform: translateY(-1px);
+}
+
+.arrowButton:active {
+  transform: translateY(0);
+}
+
+.arrowButton svg {
+  width: 29px;
+  height: 29px;
+
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ---------------------------------------------
+   HORIZONTAL TESTIMONIAL SCROLLER
+--------------------------------------------- */
+
+.viewport {
+  width: 100%;
+
+  margin-top: 143px;
+
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  padding: 0 0 2px 3.3vw;
+
+  scrollbar-width: none;
+
+  overscroll-behavior-x: contain;
+
+  scroll-behavior: smooth;
+
+  -webkit-overflow-scrolling: touch;
+
+  touch-action: pan-x;
+
+  cursor: grab;
+}
+
+.viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.viewport:active,
+.dragging {
+  cursor: grabbing;
+}
+
+.dragging {
+  user-select: none;
+}
+
+.track {
+  display: flex;
+  align-items: flex-start;
+
+  width: max-content;
+}
+
+/* ---------------------------------------------
+   TESTIMONIAL CARD
+--------------------------------------------- */
+
+.card {
+  width: 41.25vw;
+  min-width: 41.25vw;
+
+  min-height: 390px;
+
+  padding:
+    0
+    3.2vw
+    0
+    2.2vw;
+
+  border-left:
+    1px solid
+    rgba(255, 255, 255, 0.22);
+}
+
+/* ---------------------------------------------
+   REVIEW TEXT
+--------------------------------------------- */
+
+.review {
+  max-width: 590px;
+
+  margin: 0;
+
+  color: #969a9d;
+
+  font-family:
+    var(--font-neue-montreal),
+    Arial,
+    sans-serif;
+
+  font-size:
+    clamp(21px, 1.32vw, 26px);
+
+  line-height: 1.12;
+
+  font-weight: 400;
+
+  letter-spacing: -0.035em;
+}
+
+/* ---------------------------------------------
+   PERSON
+--------------------------------------------- */
+
+.person {
+  display: flex;
+  align-items: center;
+
+  gap: 30px;
+
+  margin-top: 74px;
+}
+
+.avatar {
+  display: block;
+
+  width: 96px;
+  height: 96px;
+
+  flex: 0 0 96px;
+
+  border-radius: 50%;
+
+  object-fit: cover;
+}
+
+.personCopy {
+  min-width: 0;
+}
+
+.name {
+  margin: 0 0 3px;
+
+  color: #fff;
+
+  font-family:
+    var(--font-neue-montreal),
+    Arial,
+    sans-serif;
+
+  font-size:
+    clamp(18px, 1.12vw, 23px);
+
+  line-height: 1;
+
+  font-weight: 400;
+
+  letter-spacing: -0.035em;
+
+  white-space: nowrap;
+}
+
+.role {
+  margin: 0;
+
+  max-width: 330px;
+
+  color: #78aeca;
+
+  font-family:
+    var(--font-neue-montreal),
+    Arial,
+    sans-serif;
+
+  font-size:
+    clamp(17px, 1.1vw, 22px);
+
+  line-height: 1.08;
+
+  font-weight: 400;
+
+  letter-spacing: -0.025em;
+}
+
+/* ---------------------------------------------
+   TABLET
+--------------------------------------------- */
+
+@media (max-width: 1100px) {
+  .section {
+    padding-top: 64px;
+    padding-bottom: 120px;
+  }
+
+  .header {
+    min-height: 72px;
+    padding: 0 4vw;
+  }
+
+  .controls {
+    left: 4vw;
+  }
+
+  .arrowButton {
+    width: 60px;
+    height: 60px;
+  }
+
+  .viewport {
+    margin-top: 112px;
+    padding-left: 4vw;
+  }
+
+  .card {
+    width: 58vw;
+    min-width: 58vw;
+
+    padding-left: 3vw;
+    padding-right: 4vw;
+  }
+
+  .review {
+    max-width: 560px;
+    font-size: 24px;
+  }
+}
+
+/* ---------------------------------------------
+   MOBILE
+--------------------------------------------- */
+
+@media (max-width: 700px) {
+  .section {
+    padding-top: 55px;
+    padding-bottom: 100px;
+  }
+
+  .header {
+    min-height: 0;
+    padding: 0 6vw;
+  }
+
+  .title {
+    white-space: normal;
+
+    font-size:
+      clamp(52px, 14vw, 82px);
+
+    line-height: 0.91;
+
+    letter-spacing: -0.06em;
+  }
+
+  .controls {
+    position: static;
+
+    margin-bottom: 48px;
+  }
+
+  .arrowButton {
+    width: 58px;
+    height: 58px;
+  }
+
+  .viewport {
+    margin-top: 76px;
+    padding-left: 6vw;
+  }
+
+  .card {
+    width: 84vw;
+    min-width: 84vw;
+
+    min-height: 420px;
+
+    padding-left: 5vw;
+    padding-right: 8vw;
+  }
+
+  .review {
+    max-width: none;
+
+    font-size: 22px;
+    line-height: 1.13;
+  }
+
+  .person {
+    gap: 18px;
+    margin-top: 62px;
+  }
+
+  .avatar {
+    width: 78px;
+    height: 78px;
+    flex-basis: 78px;
+  }
+
+  .name {
+    font-size: 18px;
+  }
+
+  .role {
+    font-size: 17px;
+  }
+}
+
+/* ---------------------------------------------
+   REDUCED MOTION
+--------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .viewport {
+    scroll-behavior: auto;
+  }
+
+  .arrowButton {
+    transition: none;
+  }
+}

@@ -1,0 +1,348 @@
+.section {
+  width: 100%;
+  background: #000;
+  color: #fff;
+  padding-top: 0;
+  padding-bottom: 110px;
+  overflow: hidden;
+}
+
+/* --------------------------------------------------
+   HEADER
+-------------------------------------------------- */
+
+.header {
+  width: 100%;
+  padding: 0 3.3vw;
+  margin-bottom: 76px;
+}
+
+.title {
+  margin: 0;
+  font-family: "Neue Montreal", Arial, sans-serif;
+  font-size: clamp(58px, 5.35vw, 104px);
+  line-height: 0.9;
+  font-weight: 400;
+  letter-spacing: -0.055em;
+}
+
+/* --------------------------------------------------
+   CAROUSEL
+-------------------------------------------------- */
+
+.carousel {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  padding-left: 3.3vw;
+  padding-right: 3.3vw;
+
+  scrollbar-width: none;
+
+  cursor: grab;
+
+  overscroll-behavior-x: contain;
+
+  touch-action: pan-x;
+
+  -webkit-overflow-scrolling: touch;
+}
+
+.carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.carousel:active {
+  cursor: grabbing;
+}
+
+.dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+
+/* --------------------------------------------------
+   TRACK
+-------------------------------------------------- */
+
+.track {
+  display: flex;
+  align-items: flex-start;
+
+  width: max-content;
+
+  gap: 3.8vw;
+
+  padding-right: 3.3vw;
+}
+
+/* --------------------------------------------------
+   BOOK CARD
+-------------------------------------------------- */
+
+.bookCard {
+  position: relative;
+
+  width: 23.2vw;
+
+  min-width: 23.2vw;
+
+  flex: 0 0 23.2vw;
+
+  user-select: none;
+}
+
+/* --------------------------------------------------
+   IMAGE AREA
+-------------------------------------------------- */
+
+.imageFrame {
+  position: relative;
+
+  width: 100%;
+
+  aspect-ratio: 1 / 1;
+
+  background: #292929;
+
+  overflow: hidden;
+}
+/*
+ * The actual book image sits inside the dark
+ * presentation frame.
+ *
+ * Different book covers naturally have different
+ * proportions, so object-fit: contain keeps the
+ * entire cover visible.
+ */
+.bookImage {
+  object-fit: contain;
+
+  padding: 13% 12%;
+
+  transition:
+    transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/*
+ * Very subtle movement matching the premium
+ * portfolio treatment.
+ */
+.bookCard:hover .bookImage {
+  transform: scale(1.025);
+}
+
+/* --------------------------------------------------
+   BOOK TITLE
+-------------------------------------------------- */
+
+.bookTitle {
+  margin: 34px 0 0;
+
+  font-family: "Neue Montreal", Arial, sans-serif;
+
+  font-size: clamp(20px, 1.55vw, 31px);
+
+  line-height: 1;
+
+  font-weight: 400;
+
+  letter-spacing: -0.035em;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: clip;
+}
+
+/* --------------------------------------------------
+   PAGINATION
+-------------------------------------------------- */
+
+.pagination {
+  display: flex;
+  align-items: center;
+
+  gap: 13px;
+
+  margin-top: 195px;
+
+  padding-left: 3.3vw;
+}
+
+/*
+ * The dots intentionally stay very small,
+ * matching the reference.
+ */
+.dot {
+  appearance: none;
+
+  width: 15px;
+  height: 15px;
+
+  padding: 0;
+
+  border-radius: 50%;
+
+  border: 1px solid rgba(255, 255, 255, 0.85);
+
+  background: transparent;
+
+  flex: 0 0 auto;
+
+  cursor: pointer;
+
+  transition:
+    background-color 250ms ease,
+    border-color 250ms ease,
+    transform 250ms ease;
+}
+
+.dot:hover:not(:disabled) {
+  transform: scale(1.08);
+}
+
+.activeDot {
+  background: #fff;
+  border-color: #fff;
+}
+
+/*
+ * The reference contains more pagination points
+ * than the current five books.
+ *
+ * Disabled dots remain visible but cannot be
+ * selected until additional books are added.
+ */
+.dot:disabled {
+  cursor: default;
+}
+
+/* --------------------------------------------------
+   RESPONSIVE — TABLET
+-------------------------------------------------- */
+
+@media (max-width: 1100px) {
+  .header {
+    padding-left: 4vw;
+    padding-right: 4vw;
+
+    margin-bottom: 58px;
+  }
+
+  .carousel {
+    padding-left: 4vw;
+    padding-right: 4vw;
+  }
+
+  .track {
+    gap: 4vw;
+    padding-right: 4vw;
+  }
+
+  .bookCard {
+    width: 42vw;
+    min-width: 42vw;
+    flex-basis: 42vw;
+  }
+
+  .bookTitle {
+    margin-top: 25px;
+    font-size: 24px;
+  }
+
+  .pagination {
+    padding-left: 4vw;
+    margin-top: 130px;
+  }
+}
+
+/* --------------------------------------------------
+   RESPONSIVE — MOBILE
+-------------------------------------------------- */
+
+@media (max-width: 700px) {
+  .section {
+    padding-bottom: 80px;
+  }
+
+  .header {
+    padding-left: 6vw;
+    padding-right: 6vw;
+
+    margin-bottom: 42px;
+  }
+
+  .title {
+    font-size: clamp(52px, 15vw, 82px);
+    letter-spacing: -0.06em;
+  }
+
+  .carousel {
+    padding-left: 6vw;
+    padding-right: 6vw;
+  }
+
+  .track {
+    gap: 5vw;
+    padding-right: 6vw;
+  }
+
+  .bookCard {
+    width: 78vw;
+    min-width: 78vw;
+    flex-basis: 78vw;
+  }
+
+  .imageFrame {
+    aspect-ratio: 1 / 1;
+  }
+
+  .bookImage {
+    padding: 11% 10%;
+  }
+
+  .bookTitle {
+    margin-top: 20px;
+
+    font-size: 21px;
+
+    line-height: 1.05;
+
+    letter-spacing: -0.025em;
+  }
+
+  .pagination {
+    gap: 9px;
+
+    margin-top: 95px;
+
+    padding-left: 6vw;
+
+    overflow: hidden;
+
+    padding-right: 6vw;
+  }
+
+  .dot {
+    width: 11px;
+    height: 11px;
+  }
+}
+
+/* --------------------------------------------------
+   ACCESSIBILITY
+-------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .bookImage,
+  .dot {
+    transition: none;
+  }
+
+  .carousel {
+    scroll-behavior: auto;
+  }
+}

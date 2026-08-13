@@ -1,0 +1,927 @@
+@font-face {
+  font-family: "Made Outer Sans";
+  src: url("/fonts/MADE%20Outer%20Sans%20Alt%20Regular%20PERSONAL%20USE.otf")
+    format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+.hero {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: visible;
+  background: #000000;
+}
+
+/* -------------------------------------------------
+   EA HOME BUTTON
+------------------------------------------------- */
+
+.logo {
+  position: absolute;
+
+  top: 36px;
+  left: 42px;
+
+  z-index: 50;
+
+  color: #ffffff;
+  text-decoration: none;
+
+  font-family: "Made Outer Sans", Arial, sans-serif;
+
+  font-size: 34px;
+  font-weight: 700;
+
+  letter-spacing: -0.07em;
+  line-height: 1;
+
+  opacity: 0;
+
+  pointer-events: none;
+
+  transform: translateY(-4px);
+
+  animation: logoAppear 500ms
+    cubic-bezier(0.22, 1, 0.36, 1)
+    2.55s forwards;
+
+  transition: opacity 180ms ease;
+}
+
+.logo:hover {
+  opacity: 0.65;
+}
+
+/* -------------------------------------------------
+   MENU BUTTON
+------------------------------------------------- */
+
+.menuButton {
+  position: absolute;
+
+  top: 42px;
+  right: 42px;
+
+  z-index: 60;
+
+  width: 156px;
+  height: 62px;
+
+  padding: 0 26px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 17px;
+
+  border: 0;
+  border-radius: 999px;
+
+  background: #ffffff;
+  color: #111111;
+
+  font-family:
+    var(--font-neue-montreal),
+    Arial,
+    sans-serif;
+
+  font-size: 21px;
+  font-weight: 400;
+
+  line-height: 1;
+
+  cursor: pointer;
+
+  opacity: 0;
+
+  pointer-events: none;
+
+  transform: translateY(-4px);
+
+  animation: menuButtonAppear 500ms
+    cubic-bezier(0.22, 1, 0.36, 1)
+    2.55s forwards;
+
+  transition:
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 180ms ease,
+    color 180ms ease;
+}
+
+.menuButton:hover {
+  transform: translateY(-2px);
+}
+
+.menuButton:active {
+  transform: translateY(0);
+}
+
+.menuButtonOpen {
+  background: #ffffff;
+  color: #111111;
+}
+
+/* -------------------------------------------------
+   HAMBURGER / CLOSE ICON
+------------------------------------------------- */
+
+.menuIcon {
+  position: relative;
+
+  width: 15px;
+  height: 15px;
+
+  display: block;
+
+  flex: 0 0 15px;
+
+  overflow: hidden;
+}
+
+.menuIcon span {
+  position: absolute;
+
+  left: 0;
+
+  width: 14px;
+  height: 1.5px;
+
+  background: currentColor;
+
+  transform-origin: center;
+
+  transition:
+    transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    top 240ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.menuIcon span:first-child {
+  top: 4px;
+}
+
+.menuIcon span:last-child {
+  top: 10px;
+}
+
+.menuButtonOpen .menuIcon span:first-child {
+  top: 7px;
+  transform: rotate(45deg);
+}
+
+.menuButtonOpen .menuIcon span:last-child {
+  top: 7px;
+  transform: rotate(-45deg);
+}
+
+/* -------------------------------------------------
+   SLOT-MACHINE MENU TEXT
+------------------------------------------------- */
+
+.menuLabel {
+  position: relative;
+
+  display: block;
+
+  width: auto;
+  min-width: 58px;
+
+  height: 25px;
+
+  overflow: hidden;
+
+  line-height: 25px;
+
+  flex: 0 0 auto;
+}
+
+.menuLabelTrack {
+  display: flex;
+  flex-direction: column;
+
+  width: max-content;
+
+  transform: translateY(0);
+
+  transition:
+    transform 480ms cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+.menuLabelItem {
+  display: block;
+
+  width: max-content;
+
+  height: 25px;
+
+  flex: 0 0 25px;
+
+  line-height: 25px;
+
+  text-align: left;
+}
+
+.menuButton:hover .menuLabelTrack {
+  transform: translateY(-25px);
+}
+
+.menuButtonOpen .menuLabelTrack {
+  transform: translateY(0);
+}
+
+/* -------------------------------------------------
+   MENU BACKDROP
+------------------------------------------------- */
+
+.menuBackdrop {
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 70;
+
+  width: 100%;
+  height: 100%;
+
+  padding: 0;
+
+  border: 0;
+
+  background: rgba(0, 0, 0, 0.58);
+
+  opacity: 0;
+
+  visibility: hidden;
+
+  pointer-events: none;
+
+  cursor: default;
+
+  transition:
+    opacity 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0s linear 420ms;
+}
+
+.menuBackdropVisible {
+  opacity: 1;
+
+  visibility: visible;
+
+  pointer-events: auto;
+
+  transition:
+    opacity 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0s linear 0s;
+}
+
+/* -------------------------------------------------
+   MENU DRAWER
+------------------------------------------------- */
+
+.menuDrawer {
+  position: fixed;
+
+  top: 0;
+  right: 0;
+  bottom: 0;
+
+  z-index: 80;
+
+  width: min(620px, 100vw);
+
+  background: #000000;
+  color: #ffffff;
+
+  transform: translateX(100%);
+
+  visibility: hidden;
+
+  transition:
+    transform 650ms cubic-bezier(0.77, 0, 0.175, 1),
+    visibility 0s linear 650ms;
+
+  overflow-y: auto;
+}
+
+.menuDrawerOpen {
+  transform: translateX(0);
+
+  visibility: visible;
+
+  transition:
+    transform 650ms cubic-bezier(0.77, 0, 0.175, 1),
+    visibility 0s linear 0s;
+}
+
+/* -------------------------------------------------
+   DRAWER CLOSE BUTTON
+------------------------------------------------- */
+
+.drawerClose {
+  position: absolute;
+
+  top: 32px;
+  right: 32px;
+
+  z-index: 2;
+
+  width: 44px;
+  height: 44px;
+
+  padding: 0;
+
+  border: 0;
+  background: transparent;
+
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #ffffff;
+}
+
+.drawerCloseIcon {
+  position: relative;
+
+  display: block;
+
+  width: 22px;
+  height: 22px;
+
+  transition:
+    transform 250ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.drawerCloseIcon::before,
+.drawerCloseIcon::after {
+  content: "";
+
+  position: absolute;
+
+  top: 50%;
+  left: 50%;
+
+  width: 25px;
+  height: 1.5px;
+
+  background: currentColor;
+
+  transform-origin: center;
+}
+
+.drawerCloseIcon::before {
+  transform:
+    translate(-50%, -50%)
+    rotate(45deg);
+}
+
+.drawerCloseIcon::after {
+  transform:
+    translate(-50%, -50%)
+    rotate(-45deg);
+}
+
+.drawerClose:hover .drawerCloseIcon {
+  transform: rotate(90deg);
+}
+
+/* -------------------------------------------------
+   DRAWER INNER
+------------------------------------------------- */
+
+.drawerInner {
+  min-height: 100%;
+
+  padding:
+    120px
+    28px
+    40px;
+
+  overflow: visible;
+}
+
+/* -------------------------------------------------
+   DRAWER NAVIGATION
+------------------------------------------------- */
+
+.drawerNavigation {
+  display: flex;
+  flex-direction: column;
+
+  width: 100%;
+}
+
+/* -------------------------------------------------
+   DRAWER LINKS
+------------------------------------------------- */
+
+.drawerLink {
+  position: relative;
+
+  display: block;
+
+  width: 100%;
+
+  padding: 20px 0;
+
+  color: #ffffff;
+
+  text-decoration: none;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+
+  font-family:
+    var(--font-neue-montreal),
+    Arial,
+    sans-serif;
+
+  font-size: clamp(48px, 5vw, 76px);
+
+  font-weight: 400;
+
+  line-height: 1.08;
+
+  letter-spacing: -0.045em;
+
+  white-space: nowrap;
+
+  overflow: visible;
+
+  opacity: 0;
+
+  transform: translateY(35px);
+
+  transition:
+    opacity 500ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 650ms cubic-bezier(0.22, 1, 0.36, 1),
+    padding-left 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.menuDrawerOpen .drawerLink {
+  opacity: 1;
+
+  transform: translateY(0);
+
+  transition-delay: calc(
+    100ms + var(--menu-index) * 70ms
+  );
+}
+
+.drawerLink:first-child {
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.drawerLink:hover {
+  padding-left: 12px;
+}
+
+.drawerLinkText {
+  display: inline-block;
+
+  width: max-content;
+  min-width: max-content;
+
+  white-space: nowrap;
+
+  overflow: visible;
+
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+
+.drawerArrow {
+  position: absolute;
+
+  right: 0;
+  top: 50%;
+
+  display: inline-block;
+
+  margin: 0;
+
+  color: #ffffff;
+
+  font-family:
+    var(--font-neue-montreal),
+    Arial,
+    sans-serif;
+
+  font-size: 30px;
+  font-weight: 400;
+
+  line-height: 1;
+
+  opacity: 0;
+
+  transform:
+    translateY(-50%)
+    translateX(-10px);
+
+  transition:
+    opacity 220ms ease,
+    transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.drawerLink:hover .drawerArrow {
+  opacity: 1;
+
+  transform:
+    translateY(-50%)
+    translateX(0);
+}
+
+/* -------------------------------------------------
+   ROLE TEXT
+------------------------------------------------- */
+
+.heroRole {
+  position: absolute;
+
+  top: 42px;
+  left: 289px;
+
+  z-index: 20;
+
+  display: flex;
+  flex-direction: column;
+
+  color: #ffffff;
+
+  font-family:
+    var(--font-neue-montreal),
+    Arial,
+    sans-serif;
+
+  font-size: 24px;
+  font-weight: 400;
+
+  line-height: 1.34;
+  letter-spacing: -0.025em;
+
+  opacity: 0;
+
+  transform: translateY(-4px);
+
+  animation: roleAppear 500ms
+    cubic-bezier(0.22, 1, 0.36, 1)
+    2.55s forwards;
+
+  pointer-events: none;
+}
+
+/* -------------------------------------------------
+   LARGE EMAN ALI NAME
+------------------------------------------------- */
+
+.heroName {
+  position: absolute;
+
+  left: 0;
+  bottom: -4px;
+
+  z-index: 15;
+
+  width: max-content;
+
+  color: rgb(255, 255, 255);
+
+  font-family: "Made Outer Sans", sans-serif;
+
+  font-style: normal;
+  font-weight: 400;
+
+  font-size: 156px;
+  line-height: 125px;
+
+  letter-spacing: -0.055em;
+
+  white-space: nowrap;
+
+  opacity: 0;
+
+  transform: translateY(35px);
+
+  animation: nameAppear 700ms
+    cubic-bezier(0.22, 1, 0.36, 1)
+    2.55s forwards;
+
+  pointer-events: none;
+}
+
+/* -------------------------------------------------
+   APPEARANCE ANIMATIONS
+------------------------------------------------- */
+
+@keyframes nameAppear {
+  0% {
+    opacity: 0;
+    transform: translateY(35px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes roleAppear {
+  0% {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes menuButtonAppear {
+  0% {
+    opacity: 0;
+
+    pointer-events: none;
+
+    transform: translateY(-4px);
+  }
+
+  1% {
+    pointer-events: auto;
+  }
+
+  100% {
+    opacity: 1;
+
+    pointer-events: auto;
+
+    transform: translateY(0);
+  }
+}
+
+@keyframes logoAppear {
+  0% {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-4px);
+  }
+
+  1% {
+    pointer-events: auto;
+  }
+
+  100% {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+}
+
+/* -------------------------------------------------
+   HERO IMAGE
+------------------------------------------------- */
+
+.heroMedia {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+
+  width: 340px;
+  height: 420px;
+
+  overflow: hidden;
+
+  z-index: 1;
+
+  border-radius: 3px;
+
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.55);
+
+  animation:
+    heroFrameGrow
+    2.6s
+    cubic-bezier(0.65, 0, 0.35, 1)
+    forwards;
+}
+
+.heroImage {
+  object-fit: cover;
+
+  object-position: center 42%;
+
+  background: #000000;
+
+  clip-path: inset(100% 0 0 0);
+
+  animation:
+    heroWipeUp
+    1.1s
+    cubic-bezier(0.22, 1, 0.36, 1)
+    forwards;
+}
+
+/* -------------------------------------------------
+   IMAGE WIPE
+------------------------------------------------- */
+
+@keyframes heroWipeUp {
+  0% {
+    clip-path: inset(100% 0 0 0);
+  }
+
+  100% {
+    clip-path: inset(0% 0 0 0);
+  }
+}
+
+/* -------------------------------------------------
+   FRAME EXPANSION
+------------------------------------------------- */
+
+@keyframes heroFrameGrow {
+  0% {
+    width: 340px;
+    height: 420px;
+
+    border-radius: 3px;
+
+    box-shadow:
+      0 30px 80px rgba(0, 0, 0, 0.55);
+  }
+
+  42% {
+    width: 340px;
+    height: 420px;
+
+    border-radius: 3px;
+
+    box-shadow:
+      0 30px 80px rgba(0, 0, 0, 0.55);
+  }
+
+  100% {
+    width: 100%;
+    height: 100%;
+
+    border-radius: 0;
+
+    box-shadow:
+      0 0 0 rgba(0, 0, 0, 0);
+  }
+}
+
+/* -------------------------------------------------
+   MOBILE
+------------------------------------------------- */
+
+@media (max-width: 640px) {
+  .heroMedia {
+    width: 220px;
+    height: 300px;
+  }
+
+  .logo {
+    top: 24px;
+    left: 24px;
+
+    font-size: 28px;
+  }
+
+  .menuButton {
+    top: 24px;
+    right: 24px;
+
+    width: 132px;
+    height: 54px;
+
+    padding: 0 21px;
+
+    gap: 14px;
+
+    font-size: 18px;
+  }
+
+  .menuDrawer {
+    width: 100%;
+  }
+
+  .drawerInner {
+    padding:
+      120px
+      28px
+      40px;
+  }
+
+  .drawerLink {
+    padding: 18px 0;
+
+    font-size: clamp(42px, 11.5vw, 58px);
+
+    line-height: 1.08;
+
+    white-space: nowrap;
+
+    overflow: visible;
+  }
+
+  .drawerArrow {
+    font-size: 25px;
+  }
+
+  .drawerClose {
+    top: 24px;
+    right: 24px;
+  }
+
+  .heroRole {
+    top: 28px;
+    left: 132px;
+
+    font-size: 18px;
+    line-height: 1.3;
+  }
+
+  .heroName {
+    bottom: 0;
+
+    font-size: 72px;
+    line-height: 70px;
+
+    letter-spacing: -0.055em;
+  }
+}
+
+/* -------------------------------------------------
+   REDUCED MOTION
+------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .heroMedia {
+    width: 100% !important;
+    height: 100% !important;
+
+    animation: none !important;
+  }
+
+  .heroImage {
+    clip-path: none !important;
+
+    animation: none !important;
+  }
+
+  .logo {
+    opacity: 1 !important;
+
+    pointer-events: auto;
+
+    transform: none;
+
+    animation: none !important;
+  }
+
+  .menuButton {
+    opacity: 1 !important;
+
+    pointer-events: auto;
+
+    transform: none !important;
+
+    animation: none !important;
+  }
+
+  .menuDrawer {
+    transition: none !important;
+  }
+
+  .menuBackdrop {
+    transition: none !important;
+  }
+
+  .drawerLink {
+    opacity: 1 !important;
+
+    transform: none !important;
+
+    transition: none !important;
+  }
+
+  .heroRole {
+    opacity: 1 !important;
+
+    transform: none;
+
+    animation: none !important;
+  }
+
+  .heroName {
+    opacity: 1 !important;
+
+    transform: none;
+
+    animation: none !important;
+  }
+}
