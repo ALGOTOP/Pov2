@@ -175,7 +175,7 @@ export default function Books() {
   };
 
   return (
-    <section className={styles.section}>
+    <section id="books" className={styles.section}>
       <div className={styles.header}>
         <h2 className={styles.title}>BOOKS</h2>
       </div>

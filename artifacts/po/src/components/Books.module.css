@@ -283,6 +283,7 @@
   .carousel {
     padding-left: 6vw;
     padding-right: 6vw;
+    scroll-snap-type: x mandatory;
   }
 
   .track {
@@ -294,6 +295,8 @@
     width: 78vw;
     min-width: 78vw;
     flex-basis: 78vw;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
   }
 
   .imageFrame {

@@ -45,6 +45,28 @@
   }
 }
 
+@media (max-width: 767px) {
+  .section {
+    padding-top: 96px;
+    padding-bottom: 64px;
+  }
+
+  .inner {
+    max-width: none;
+  }
+
+  .paragraph {
+    font-size: clamp(25px, 7vw, 30px);
+    line-height: 1.18;
+    letter-spacing: -0.025em;
+    text-wrap: pretty;
+  }
+
+  .paragraph + .paragraph {
+    margin-top: 32px;
+  }
+}
+
 /* 768-1023px (tablet) */
 @media (min-width: 768px) {
   .paragraph {

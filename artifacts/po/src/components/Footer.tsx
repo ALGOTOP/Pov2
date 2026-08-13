@@ -23,7 +23,7 @@ const navigation = [
 
 export default function Footer() {
   return (
-    <footer className={styles.footer}>
+    <footer id="contact" className={styles.footer}>
       <div className={styles.footerMain}>
         {/* NEWSLETTER */}
         <div className={styles.newsletter}>

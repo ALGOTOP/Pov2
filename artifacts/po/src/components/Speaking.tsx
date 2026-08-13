@@ -83,6 +83,7 @@ export default function Speaking() {
 
   return (
     <section
+      id="work"
       ref={sectionRef}
       className={styles.section}
       data-revealed="false"

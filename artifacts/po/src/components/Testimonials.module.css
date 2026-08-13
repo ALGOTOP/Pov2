@@ -333,6 +333,7 @@
   .viewport {
     margin-top: 76px;
     padding-left: 6vw;
+    scroll-snap-type: x mandatory;
   }
 
   .card {
@@ -343,6 +344,8 @@
 
     padding-left: 5vw;
     padding-right: 8vw;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
   }
 
   .review {

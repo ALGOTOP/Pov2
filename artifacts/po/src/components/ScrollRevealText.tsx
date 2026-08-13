@@ -179,7 +179,10 @@ export default function ScrollRevealText({
   }, [paragraphs]);
 
   return (
-    <section className={`${styles.section} ${className ?? ""}`}>
+    <section
+      id="about"
+      className={`${styles.section} ${className ?? ""}`}
+    >
       <div className={styles.inner}>
         {paragraphs.map((words, pIdx) => {
           wordRefsByParagraph.current[pIdx] = [];
