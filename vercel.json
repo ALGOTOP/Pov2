@@ -1,0 +1,5 @@
+{
+  "buildCommand": "pnpm --filter @workspace/po build",
+  "outputDirectory": "artifacts/po/dist/public",
+  "installCommand": "pnpm install --frozen-lockfile"
+}
