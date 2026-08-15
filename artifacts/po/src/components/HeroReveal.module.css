@@ -595,8 +595,8 @@
   font-style: normal;
   font-weight: 400;
 
-  font-size: 156px;
-  line-height: 125px;
+  font-size: 117px;
+  line-height: 94px;
 
   letter-spacing: -0.055em;
 
@@ -852,8 +852,8 @@
   .heroName {
     bottom: 0;
 
-    font-size: 72px;
-    line-height: 70px;
+    font-size: 43.2px;
+    line-height: 42px;
 
     letter-spacing: -0.055em;
   }
