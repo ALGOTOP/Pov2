@@ -23,7 +23,7 @@
 .logo {
   position: absolute;
 
-  top: 36px;
+  top: 56px;
   left: 42px;
 
   z-index: 50;
@@ -793,7 +793,7 @@
   }
 
   .logo {
-    top: 24px;
+    top: 37px;
     left: 24px;
 
     font-size: 28px;
