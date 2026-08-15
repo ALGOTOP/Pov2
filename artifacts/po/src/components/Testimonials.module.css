@@ -311,6 +311,8 @@
   .title {
     white-space: normal;
 
+    text-align: left;
+
     font-size:
       clamp(52px, 14vw, 82px);
 
@@ -320,9 +322,7 @@
   }
 
   .controls {
-    position: static;
-
-    margin-bottom: 48px;
+    display: none;
   }
 
   .arrowButton {
@@ -337,13 +337,13 @@
   }
 
   .card {
-    width: 84vw;
-    min-width: 84vw;
+    width: 67.2vw;
+    min-width: 67.2vw;
 
-    min-height: 420px;
+    min-height: 336px;
 
-    padding-left: 5vw;
-    padding-right: 8vw;
+    padding-left: 4vw;
+    padding-right: 6.4vw;
     scroll-snap-align: start;
     scroll-snap-stop: always;
   }
@@ -351,27 +351,27 @@
   .review {
     max-width: none;
 
-    font-size: 22px;
+    font-size: 17.6px;
     line-height: 1.13;
   }
 
   .person {
-    gap: 18px;
-    margin-top: 62px;
+    gap: 14px;
+    margin-top: 50px;
   }
 
   .avatar {
-    width: 78px;
-    height: 78px;
-    flex-basis: 78px;
+    width: 62px;
+    height: 62px;
+    flex-basis: 62px;
   }
 
   .name {
-    font-size: 18px;
+    font-size: 14.4px;
   }
 
   .role {
-    font-size: 17px;
+    font-size: 13.6px;
   }
 }
 
