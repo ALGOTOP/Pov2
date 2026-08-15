@@ -9,7 +9,7 @@
 
 .inner {
   width: 100%;
-  max-width: 55vw;
+  max-width: 66vw;
   margin: 0;
 }
 
@@ -31,11 +31,11 @@
 
   /* Mobile-first responsive scale -- see breakpoints below for
      tablet / reference-desktop (1138px) / large-desktop values. */
-  font-size: clamp(25px, 7.5vw, 30px);
+  font-size: clamp(21px, 5.5vw, 23px);
 }
 
 .paragraph + .paragraph {
-  margin-top: 40px;
+  margin-top: 32px;
 }
 
 /* 480-767px */
@@ -56,35 +56,36 @@
   }
 
   .paragraph {
-    font-size: clamp(25px, 7vw, 30px);
-    line-height: 1.18;
+    font-size: clamp(21px, 5.5vw, 23px);
+    line-height: 1.16;
     letter-spacing: -0.025em;
     text-wrap: pretty;
   }
 
   .paragraph + .paragraph {
-    margin-top: 32px;
+    margin-top: 24px;
   }
 }
 
 /* 768-1023px (tablet) */
 @media (min-width: 768px) {
   .paragraph {
-    font-size: clamp(32px, 4.2vw, 40px);
+    font-size: clamp(29px, 3.6vw, 36px);
   }
 }
 
-/* 1024-1439px -- reference desktop width (~1138px) targets exactly 42px */
+/* 1024-1439px -- wider editorial column with a more compact reading rhythm */
 @media (min-width: 1024px) {
   .paragraph {
-    font-size: 42px;
+    font-size: 36px;
+    line-height: 1.18;
   }
 }
 
 /* 1440px+ -- large desktop */
 @media (min-width: 1440px) {
   .paragraph {
-    font-size: clamp(40px, 2vw, 44px);
+    font-size: clamp(36px, 1.8vw, 40px);
   }
 }
 
