@@ -26,6 +26,10 @@ body {
   overflow-x: hidden;
 }
 
+:root {
+  --font-neue-montreal: "Neue Montreal";
+}
+
 body {
   background: #000000;
   color: #ffffff;
