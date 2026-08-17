@@ -288,6 +288,7 @@
     padding-left: 6vw;
     padding-right: 6vw;
     scroll-snap-type: x mandatory;
+    touch-action: pan-x pan-y;
   }
 
   .track {

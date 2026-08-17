@@ -314,7 +314,7 @@
     text-align: left;
 
     font-size:
-      clamp(52px, 14vw, 82px);
+      clamp(42px, 11.2vw, 66px);
 
     line-height: 0.91;
 
@@ -334,6 +334,7 @@
     margin-top: 76px;
     padding-left: 6vw;
     scroll-snap-type: x mandatory;
+    touch-action: pan-x pan-y;
   }
 
   .card {

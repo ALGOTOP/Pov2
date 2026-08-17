@@ -112,7 +112,7 @@ export default function Books() {
   ) => {
     const carousel = carouselRef.current;
 
-    if (!carousel) return;
+    if (!carousel || event.pointerType === "touch") return;
 
     setIsDragging(true);
 
