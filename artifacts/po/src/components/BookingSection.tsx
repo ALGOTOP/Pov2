@@ -1,18 +1,14 @@
 import { useEffect, useRef } from "react";
 import styles from "./BookingSection.module.css";
 
-// Temporary development link. Replace only this value when the client's
-// real Cal.com event link is available.
 export const CAL_BOOKING_LINK = "pehchaan-media/15min";
 
 const CAL_EMBED_SCRIPT = "https://app.cal.com/embed/embed.js";
 
-// Cal.com exposes a global API from its embed script. Keep the type local so
-// this component does not require another npm dependency.
 type CalApi = {
   (action: string, ...args: any[]): void;
   loaded?: boolean;
-  q?: unknown[];
+  q?: any[];
 };
 
 declare global {
@@ -28,21 +24,26 @@ export default function BookingSection() {
     const element = calendarRef.current;
     if (!element) return;
 
+    const elementId = "pehchaan-cal-inline";
+    element.id = elementId;
+
     let disposed = false;
     let pollId: number | undefined;
+    let initialized = false;
 
     const mountCalendar = () => {
-      if (disposed || !element || !window.Cal) return;
+      if (disposed || initialized || !window.Cal) return;
 
-      // Clear anything left by a previous React mount before initializing.
-      element.replaceChildren();
+      initialized = true;
 
-      // Cal.com's official embed flow: initialize the SDK, create an inline
-      // embed in this element, then configure its UI.
-      window.Cal("init", { origin: "https://app.cal.com" });
+      // Cal.com's inline embed API expects a selector string for the
+      // element/target. Using a stable ID avoids passing a DOM node directly.
+      window.Cal("init", {
+        origin: "https://app.cal.com",
+      });
 
       window.Cal("inline", {
-        elementOrSelector: element,
+        elementOrSelector: `#${elementId}`,
         calLink: CAL_BOOKING_LINK,
         config: {
           layout: "month_view",
@@ -60,7 +61,20 @@ export default function BookingSection() {
           },
         },
         hideEventTypeDetails: false,
+        theme: "dark",
       });
+    };
+
+    const waitForCal = () => {
+      if (disposed) return;
+
+      if (window.Cal) {
+        mountCalendar();
+        if (pollId !== undefined) {
+          window.clearInterval(pollId);
+          pollId = undefined;
+        }
+      }
     };
 
     const existing = document.querySelector<HTMLScriptElement>(
@@ -70,27 +84,25 @@ export default function BookingSection() {
     if (window.Cal) {
       mountCalendar();
     } else if (existing) {
-      existing.addEventListener("load", mountCalendar, { once: true });
-
-      // The script may already have loaded before this component mounted.
-      pollId = window.setInterval(() => {
-        if (window.Cal) {
-          window.clearInterval(pollId);
-          pollId = undefined;
-          mountCalendar();
-        }
-      }, 100);
+      existing.addEventListener("load", waitForCal, { once: true });
+      pollId = window.setInterval(waitForCal, 100);
     } else {
       const script = document.createElement("script");
       script.src = CAL_EMBED_SCRIPT;
       script.async = true;
-      script.addEventListener("load", mountCalendar, { once: true });
+      script.addEventListener("load", waitForCal, { once: true });
       document.head.appendChild(script);
+
+      pollId = window.setInterval(waitForCal, 100);
     }
 
     return () => {
       disposed = true;
-      if (pollId !== undefined) window.clearInterval(pollId);
+
+      if (pollId !== undefined) {
+        window.clearInterval(pollId);
+      }
+
       element.replaceChildren();
     };
   }, []);
