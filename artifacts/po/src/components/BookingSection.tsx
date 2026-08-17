@@ -1,13 +1,100 @@
-"use client";
-
-import Cal from "@calcom/embed-react";
+import { useEffect, useRef } from "react";
 import styles from "./BookingSection.module.css";
 
 // Temporary development link. Replace only this value when the client's
 // real Cal.com event link is available.
 export const CAL_BOOKING_LINK = "pehchaan-media/15min";
 
+const CAL_EMBED_SCRIPT = "https://app.cal.com/embed/embed.js";
+
+// Cal.com exposes a global API from its embed script. Keep the type local so
+// this component does not require another npm dependency.
+type CalApi = {
+  (action: string, ...args: any[]): void;
+  loaded?: boolean;
+  q?: unknown[];
+};
+
+declare global {
+  interface Window {
+    Cal?: CalApi;
+  }
+}
+
 export default function BookingSection() {
+  const calendarRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const element = calendarRef.current;
+    if (!element) return;
+
+    let disposed = false;
+    let pollId: number | undefined;
+
+    const mountCalendar = () => {
+      if (disposed || !element || !window.Cal) return;
+
+      // Clear anything left by a previous React mount before initializing.
+      element.replaceChildren();
+
+      // Cal.com's official embed flow: initialize the SDK, create an inline
+      // embed in this element, then configure its UI.
+      window.Cal("init", { origin: "https://app.cal.com" });
+
+      window.Cal("inline", {
+        elementOrSelector: element,
+        calLink: CAL_BOOKING_LINK,
+        config: {
+          layout: "month_view",
+          theme: "dark",
+        },
+      });
+
+      window.Cal("ui", {
+        styles: {
+          body: {
+            background: "transparent",
+          },
+          eventTypeListItem: {
+            background: "transparent",
+          },
+        },
+        hideEventTypeDetails: false,
+      });
+    };
+
+    const existing = document.querySelector<HTMLScriptElement>(
+      `script[src="${CAL_EMBED_SCRIPT}"]`,
+    );
+
+    if (window.Cal) {
+      mountCalendar();
+    } else if (existing) {
+      existing.addEventListener("load", mountCalendar, { once: true });
+
+      // The script may already have loaded before this component mounted.
+      pollId = window.setInterval(() => {
+        if (window.Cal) {
+          window.clearInterval(pollId);
+          pollId = undefined;
+          mountCalendar();
+        }
+      }, 100);
+    } else {
+      const script = document.createElement("script");
+      script.src = CAL_EMBED_SCRIPT;
+      script.async = true;
+      script.addEventListener("load", mountCalendar, { once: true });
+      document.head.appendChild(script);
+    }
+
+    return () => {
+      disposed = true;
+      if (pollId !== undefined) window.clearInterval(pollId);
+      element.replaceChildren();
+    };
+  }, []);
+
   return (
     <section
       id="booking"
@@ -46,20 +133,11 @@ export default function BookingSection() {
         </div>
 
         <div className={styles.calendarColumn}>
-          <div className={styles.calendar} aria-label="Book a 15 minute call">
-            <Cal
-              calLink={CAL_BOOKING_LINK}
-              style={{
-                width: "100%",
-                height: "100%",
-                overflow: "auto",
-              }}
-              config={{
-                layout: "month_view",
-                theme: "dark",
-              }}
-            />
-          </div>
+          <div
+            ref={calendarRef}
+            className={styles.calendar}
+            aria-label="Book a 15 minute call"
+          />
         </div>
       </div>
     </section>
