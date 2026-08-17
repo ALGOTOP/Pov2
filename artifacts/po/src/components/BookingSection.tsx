@@ -9,6 +9,7 @@ type CalApi = {
   (action: string, ...args: any[]): void;
   loaded?: boolean;
   q?: any[];
+  ns?: Record<string, any>;
 };
 
 declare global {
@@ -27,82 +28,77 @@ export default function BookingSection() {
     const elementId = "pehchaan-cal-inline";
     element.id = elementId;
 
-    let disposed = false;
-    let pollId: number | undefined;
-    let initialized = false;
+    // Cal.com's embed.js is NOT a self-contained script — it expects
+    // window.Cal to already exist as this exact "stub" function before it
+    // loads. The stub does two things: (1) it appends the embed.js script
+    // tag itself the first time it's called, and (2) it queues up every
+    // Cal(...) call made before the real script finishes loading, so calls
+    // never get lost. This is Cal.com's official loader snippet — do not
+    // replace it with a plain <script src="..."> tag + onload handler, that
+    // throws "Cal is not defined. This shouldn't happen." because embed.js
+    // reads from the queue this stub sets up.
+    (function (C: any, A: string, L: string) {
+      const p = (a: any, ar: any) => {
+        a.q.push(ar);
+      };
+      const d = C.document;
+      C.Cal =
+        C.Cal ||
+        function (...args: any[]) {
+          const cal = C.Cal;
+          const ar = args;
+          if (!cal.loaded) {
+            cal.ns = {};
+            cal.q = cal.q || [];
+            d.head.appendChild(d.createElement("script")).src = A;
+            cal.loaded = true;
+          }
+          if (ar[0] === L) {
+            const api: any = (...apiArgs: any[]) => p(api, apiArgs);
+            const namespace = ar[1];
+            api.q = api.q || [];
+            if (typeof namespace === "string") {
+              cal.ns[namespace] = cal.ns[namespace] || api;
+              p(cal.ns[namespace], ar);
+              p(cal, ["initNamespace", namespace]);
+            } else {
+              p(cal, ar);
+            }
+            return;
+          }
+          p(cal, ar);
+        };
+    })(window, CAL_EMBED_SCRIPT, "init");
 
-    const mountCalendar = () => {
-      if (disposed || initialized || !window.Cal) return;
+    const Cal = window.Cal!;
 
-      initialized = true;
+    Cal("init", {
+      origin: "https://app.cal.com",
+    });
 
-      // Cal.com's inline embed API expects a selector string for the
-      // element/target. Using a stable ID avoids passing a DOM node directly.
-      window.Cal("init", {
-        origin: "https://app.cal.com",
-      });
-
-      window.Cal("inline", {
-        elementOrSelector: `#${elementId}`,
-        calLink: CAL_BOOKING_LINK,
-        config: {
-          layout: "month_view",
-          theme: "dark",
-        },
-      });
-
-      window.Cal("ui", {
-        styles: {
-          body: {
-            background: "transparent",
-          },
-          eventTypeListItem: {
-            background: "transparent",
-          },
-        },
-        hideEventTypeDetails: false,
+    Cal("inline", {
+      elementOrSelector: `#${elementId}`,
+      calLink: CAL_BOOKING_LINK,
+      config: {
+        layout: "month_view",
         theme: "dark",
-      });
-    };
+      },
+    });
 
-    const waitForCal = () => {
-      if (disposed) return;
-
-      if (window.Cal) {
-        mountCalendar();
-        if (pollId !== undefined) {
-          window.clearInterval(pollId);
-          pollId = undefined;
-        }
-      }
-    };
-
-    const existing = document.querySelector<HTMLScriptElement>(
-      `script[src="${CAL_EMBED_SCRIPT}"]`,
-    );
-
-    if (window.Cal) {
-      mountCalendar();
-    } else if (existing) {
-      existing.addEventListener("load", waitForCal, { once: true });
-      pollId = window.setInterval(waitForCal, 100);
-    } else {
-      const script = document.createElement("script");
-      script.src = CAL_EMBED_SCRIPT;
-      script.async = true;
-      script.addEventListener("load", waitForCal, { once: true });
-      document.head.appendChild(script);
-
-      pollId = window.setInterval(waitForCal, 100);
-    }
+    Cal("ui", {
+      styles: {
+        body: {
+          background: "transparent",
+        },
+        eventTypeListItem: {
+          background: "transparent",
+        },
+      },
+      hideEventTypeDetails: false,
+      theme: "dark",
+    });
 
     return () => {
-      disposed = true;
-
-      if (pollId !== undefined) {
-        window.clearInterval(pollId);
-      }
-
       element.replaceChildren();
     };
   }, []);
@@ -130,7 +126,7 @@ export default function BookingSection() {
             a reliable long-form writing partner behind the scenes.
           </p>
 
-          <a
+          
             className={styles.emailPill}
             href="mailto:infopehchaanmedia@gmail.com"
           >
