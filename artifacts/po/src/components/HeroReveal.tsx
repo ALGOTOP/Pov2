@@ -14,15 +14,15 @@ const menuItems = [
     href: "/",
   },
   {
-    label: "About",
-    href: "#about",
-  },
-  {
     label: "Books",
     href: "#books",
   },
   {
-    label: "Work",
+    label: "About",
+    href: "#about",
+  },
+  {
+    label: "Contact",
     href: "#work",
   },
 ];
@@ -64,6 +64,56 @@ export default function HeroReveal({
     setMenuOpen(false);
   };
 
+  const handleNavigation = (
+    event: React.MouseEvent<HTMLAnchorElement>,
+    href: string
+  ) => {
+    if (href === "/") {
+      return;
+    }
+
+    const targetId = href.slice(1);
+    const target = document.getElementById(targetId);
+
+    if (!target) {
+      return;
+    }
+
+    event.preventDefault();
+    closeMenu();
+
+    const start = window.scrollY;
+    const targetTop =
+      target.getBoundingClientRect().top + window.scrollY;
+    const targetPosition =
+      targetId === "books" || targetId === "work"
+        ? targetTop + target.offsetHeight / 2 - window.innerHeight / 2
+        : targetTop;
+    const distance = targetPosition - start;
+    const duration = Math.min(760, Math.max(520, Math.abs(distance) * 0.32));
+    const startTime = performance.now();
+
+    const easeInOut = (progress: number) =>
+      progress < 0.5
+        ? 2 * progress * progress
+        : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+
+    const animateScroll = (currentTime: number) => {
+      const progress = Math.min(
+        (currentTime - startTime) / duration,
+        1
+      );
+
+      window.scrollTo(0, start + distance * easeInOut(progress));
+
+      if (progress < 1) {
+        requestAnimationFrame(animateScroll);
+      }
+    };
+
+    requestAnimationFrame(animateScroll);
+  };
+
   return (
     <div className={styles.hero}>
       <div className={styles.heroMedia}>
@@ -85,11 +135,30 @@ export default function HeroReveal({
 
       {/* DESKTOP NAVIGATION */}
       <nav className={styles.desktopNavigation} aria-label="Main navigation">
-        <a href="#work">Work</a>
-        <a href="#services">Services</a>
-        <a href="#about">About</a>
-        <a href="#contact">Contact</a>
-        <a href="#contact" className={styles.getStartedButton}>
+        <a href="/">Home</a>
+        <a
+          href="#books"
+          onClick={(event) => handleNavigation(event, "#books")}
+        >
+          Books
+        </a>
+        <a
+          href="#about"
+          onClick={(event) => handleNavigation(event, "#about")}
+        >
+          About
+        </a>
+        <a
+          href="#work"
+          onClick={(event) => handleNavigation(event, "#work")}
+        >
+          Contact
+        </a>
+        <a
+          href="#work"
+          className={styles.getStartedButton}
+          onClick={(event) => handleNavigation(event, "#work")}
+        >
           Get Started
         </a>
       </nav>
@@ -163,7 +232,7 @@ export default function HeroReveal({
                   } as React.CSSProperties
                 }
                 tabIndex={menuOpen ? 0 : -1}
-                onClick={closeMenu}
+                onClick={(event) => handleNavigation(event, item.href)}
               >
                 <span className={styles.drawerLinkText}>
                   {item.label}
