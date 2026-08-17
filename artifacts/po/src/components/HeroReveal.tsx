@@ -83,7 +83,18 @@ export default function HeroReveal({
         EA
       </a>
 
-      {/* MENU BUTTON */}
+      {/* DESKTOP NAVIGATION */}
+      <nav className={styles.desktopNavigation} aria-label="Main navigation">
+        <a href="#work">Work</a>
+        <a href="#services">Services</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+        <a href="#contact" className={styles.getStartedButton}>
+          Get Started
+        </a>
+      </nav>
+
+      {/* MOBILE / TABLET MENU BUTTON */}
       <button
         type="button"
         className={`${styles.menuButton} ${
