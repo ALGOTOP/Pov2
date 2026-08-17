@@ -21,16 +21,17 @@ export default function BookingSection() {
     };
 
     let cancelled = false;
+    let pollTimer: number | undefined;
 
     const initializeCalendar = () => {
-      if (cancelled || !win.Cal || !calendarElement) return;
+      if (!win.Cal || !calendarElement || cancelled) return;
 
-      // Clear any previous embed before initializing again.
-      calendarElement.replaceChildren();
+      // Cal.com's documented inline embed flow: initialize the SDK first,
+      // then append the booking interface directly into our element.
+      win.Cal("init", {
+        origin: "https://cal.com",
+      });
 
-      // Cal.com's current inline embed API. Using the global inline call
-      // avoids relying on a namespace-specific method that can vary between
-      // embed SDK versions.
       win.Cal("inline", {
         elementOrSelector: calendarElement,
         calLink: CAL_BOOKING_LINK,
@@ -53,22 +54,36 @@ export default function BookingSection() {
       });
     };
 
+    if (win.Cal) {
+      initializeCalendar();
+      return () => {
+        cancelled = true;
+        calendarElement.replaceChildren();
+      };
+    }
+
     const existingScript = document.querySelector<HTMLScriptElement>(
       `script[src="${CAL_EMBED_SCRIPT}"]`,
     );
 
     if (existingScript) {
-      if (win.Cal) {
-        initializeCalendar();
-      } else {
-        existingScript.addEventListener("load", initializeCalendar, {
-          once: true,
-        });
-      }
+      existingScript.addEventListener("load", initializeCalendar, {
+        once: true,
+      });
+
+      // If the script was already loaded before this component mounted, its
+      // load event will not fire again. Poll briefly for the global SDK.
+      pollTimer = window.setInterval(() => {
+        if (win.Cal) {
+          window.clearInterval(pollTimer);
+          initializeCalendar();
+        }
+      }, 100);
 
       return () => {
         cancelled = true;
         existingScript.removeEventListener("load", initializeCalendar);
+        if (pollTimer) window.clearInterval(pollTimer);
         calendarElement.replaceChildren();
       };
     }
@@ -76,12 +91,14 @@ export default function BookingSection() {
     const script = document.createElement("script");
     script.src = CAL_EMBED_SCRIPT;
     script.async = true;
+
     script.onload = initializeCalendar;
     document.head.appendChild(script);
 
     return () => {
       cancelled = true;
       script.onload = null;
+      if (pollTimer) window.clearInterval(pollTimer);
       calendarElement.replaceChildren();
     };
   }, []);
@@ -90,9 +107,47 @@ export default function BookingSection() {
     <section
       id="booking"
       className={styles.section}
-      aria-label="Book a 15 minute call"
+      aria-labelledby="booking-title"
     >
-      <div ref={calendarRef} className={styles.calendar} />
+      <div className={styles.inner}>
+        <div className={styles.copyColumn}>
+          <h2 id="booking-title" className={styles.heading}>
+            See if Eman is the right fit
+            <span className={styles.headingAccent}>for you</span>
+          </h2>
+
+          <p className={styles.description}>
+            Schedule a quick, 15 minute guided call with Eman to see if the
+            project, process, and creative fit make sense.
+          </p>
+
+          <p className={styles.supportingText}>
+            We work with publishers, packagers, authors, and teams looking for
+            a reliable long-form writing partner behind the scenes.
+          </p>
+
+          <a
+            className={styles.emailPill}
+            href="mailto:infopehchaanmedia@gmail.com"
+          >
+            <span className={styles.emailIcon} aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <rect x="3.5" y="5" width="17" height="14" rx="3" />
+                <path d="m5.5 7.5 6.5 5 6.5-5" />
+              </svg>
+            </span>
+            <span>infopehchaanmedia@gmail.com</span>
+          </a>
+        </div>
+
+        <div className={styles.calendarColumn}>
+          <div
+            ref={calendarRef}
+            className={styles.calendar}
+            aria-label="Book a 15 minute call"
+          />
+        </div>
+      </div>
     </section>
   );
 }
