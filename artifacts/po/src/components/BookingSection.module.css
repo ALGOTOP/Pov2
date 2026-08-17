@@ -1,7 +1,6 @@
 .section {
   position: relative;
   width: 100%;
-  overflow: hidden;
   background: #0a0a0c;
   color: #fff;
   font-family:
@@ -25,15 +24,6 @@
 .copyColumn {
   align-self: center;
   max-width: 540px;
-}
-
-.eyebrow {
-  margin: 0 0 30px;
-  color: rgba(255, 255, 255, 0.46);
-  font-size: 12px;
-  line-height: 1;
-  font-weight: 500;
-  letter-spacing: 0.13em;
 }
 
 .heading {
@@ -123,32 +113,27 @@
 
 .calendarColumn {
   min-width: 0;
-}
-
-.calendarShell {
-  position: relative;
   width: 100%;
-  min-height: 650px;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 18px;
-  background: #111114;
-  box-shadow:
-    0 26px 70px rgba(0, 0, 0, 0.44),
-    inset 0 1px 0 rgba(255, 255, 255, 0.035);
 }
 
 .calendar {
+  position: relative;
   width: 100%;
   min-height: 650px;
-  overflow: hidden;
+  height: 650px;
+  overflow: visible;
 }
 
-/* Keep Cal.com's generated iframe visually contained by our shell. */
-.calendar :global(iframe) {
+/*
+ * Cal.com creates its own iframe inside this element.
+ * Do not put a background, border, radius, or shadow around it:
+ * the calendar should sit directly on the site's dark background.
+ */
+.calendar iframe {
   display: block;
   width: 100% !important;
-  min-height: 650px;
+  height: 650px !important;
+  min-height: 650px !important;
   border: 0 !important;
 }
 
@@ -176,9 +161,14 @@
     max-width: 570px;
   }
 
-  .calendarShell,
   .calendar {
+    height: 680px;
     min-height: 680px;
+  }
+
+  .calendar iframe {
+    height: 680px !important;
+    min-height: 680px !important;
   }
 }
 
@@ -187,10 +177,6 @@
     width: calc(100% - 40px);
     gap: 48px;
     padding: 74px 0 76px;
-  }
-
-  .eyebrow {
-    margin-bottom: 22px;
   }
 
   .heading {
@@ -214,12 +200,13 @@
     font-size: 12px;
   }
 
-  .calendarShell {
+  .calendar {
+    height: 680px;
     min-height: 680px;
-    border-radius: 14px;
   }
 
-  .calendar {
-    min-height: 680px;
+  .calendar iframe {
+    height: 680px !important;
+    min-height: 680px !important;
   }
 }
