@@ -126,7 +126,7 @@ export default function BookingSection() {
             a reliable long-form writing partner behind the scenes.
           </p>
 
-          
+          <a
             className={styles.emailPill}
             href="mailto:infopehchaanmedia@gmail.com"
           >
