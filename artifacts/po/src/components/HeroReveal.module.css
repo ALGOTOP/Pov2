@@ -126,6 +126,105 @@
 }
 
 /* -------------------------------------------------
+   DESKTOP NAVIGATION
+------------------------------------------------- */
+
+.desktopNavigation {
+  position: absolute;
+
+  top: 42px;
+  right: 42px;
+
+  z-index: 60;
+
+  display: none;
+  align-items: center;
+  gap: 34px;
+
+  min-height: 62px;
+  padding: 10px 10px 10px 28px;
+
+  border-radius: 999px;
+
+  background: #ffffff;
+  color: #111111;
+
+  font-family:
+    var(--font-neue-montreal),
+    Arial,
+    sans-serif;
+
+  opacity: 0;
+  pointer-events: none;
+
+  transform: translateY(-4px);
+
+  animation: desktopNavigationAppear 500ms
+    cubic-bezier(0.22, 1, 0.36, 1)
+    2.65s forwards;
+}
+
+.desktopNavigation a {
+  color: #111111;
+
+  text-decoration: none;
+
+  font-family:
+    var(--font-neue-montreal),
+    Arial,
+    sans-serif;
+
+  font-size: 17px;
+  font-weight: 400;
+
+  line-height: 1;
+
+  white-space: nowrap;
+
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.desktopNavigation a:hover {
+  opacity: 0.62;
+  transform: translateY(-1px);
+}
+
+.getStartedButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 42px;
+
+  padding: 0 18px;
+
+  border-radius: 8px;
+
+  background: #111111;
+  color: #ffffff !important;
+
+  font-weight: 500 !important;
+}
+
+.getStartedButton:hover {
+  opacity: 1 !important;
+  background: #222222;
+  transform: translateY(-1px);
+}
+
+@media (min-width: 901px) {
+  .desktopNavigation {
+    display: flex;
+  }
+
+  .menuButton {
+    display: none;
+  }
+}
+
+/* -------------------------------------------------
    HAMBURGER / CLOSE ICON
 ------------------------------------------------- */
 
@@ -641,6 +740,24 @@
   }
 }
 
+@keyframes desktopNavigationAppear {
+  0% {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-4px);
+  }
+
+  1% {
+    pointer-events: auto;
+  }
+
+  100% {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+}
+
 @keyframes menuButtonAppear {
   0% {
     opacity: 0;
@@ -782,6 +899,16 @@
   }
 }
 
+@media (max-width: 900px) {
+  .desktopNavigation {
+    display: none;
+  }
+
+  .menuButton {
+    display: flex;
+  }
+}
+
 /* -------------------------------------------------
    MOBILE
 ------------------------------------------------- */
@@ -896,6 +1023,17 @@
 
     animation: none !important;
   }
+
+  .desktopNavigation {
+    opacity: 1 !important;
+
+    pointer-events: auto;
+
+    transform: none !important;
+
+    animation: none !important;
+  }
+
 
   .menuDrawer {
     transition: none !important;
