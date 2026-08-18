@@ -19,16 +19,24 @@ export default function Home() {
         alt=""
       />
 
-      <ScrollRevealText text={bioText} />
+      {/* ABOUT / EDITORIAL TEXT */}
+      <div id="about">
+        <ScrollRevealText text={bioText} />
+      </div>
 
       <Credibility />
 
-      <Books />
+      {/* BOOKS */}
+      <div id="books">
+        <Books />
+      </div>
 
       <Testimonials />
 
+      {/* CONTACT / WORK WITH EMAN */}
       <Speaking />
 
+      {/* GET STARTED / CAL.COM */}
       <BookingSection />
 
       <Footer />
