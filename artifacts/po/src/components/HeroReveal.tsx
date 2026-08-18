@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styles from "./HeroReveal.module.css";
 
 type HeroRevealProps = {
@@ -9,22 +9,10 @@ type HeroRevealProps = {
 };
 
 const menuItems = [
-  {
-    label: "Home",
-    href: "/",
-  },
-  {
-    label: "Books",
-    href: "#books",
-  },
-  {
-    label: "About",
-    href: "#about",
-  },
-  {
-    label: "Contact",
-    href: "#work",
-  },
+  { label: "Home", href: "/" },
+  { label: "Books", href: "#books" },
+  { label: "About", href: "#about" },
+  { label: "Contact", href: "#work" },
 ];
 
 export default function HeroReveal({
@@ -32,14 +20,10 @@ export default function HeroReveal({
   alt = "",
 }: HeroRevealProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const scrollAnimationRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (!menuOpen) {
-      document.body.style.overflow = "";
-      return;
-    }
-
-    document.body.style.overflow = "hidden";
+    document.body.style.overflow = menuOpen ? "hidden" : "";
 
     return () => {
       document.body.style.overflow = "";
@@ -57,10 +41,17 @@ export default function HeroReveal({
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
+
+      if (scrollAnimationRef.current !== null) {
+        cancelAnimationFrame(scrollAnimationRef.current);
+      }
     };
   }, []);
 
   const closeMenu = () => {
+    // Unlock immediately so the scroll animation can begin on the same click
+    // on mobile/tablet, rather than waiting for the React effect to run.
+    document.body.style.overflow = "";
     setMenuOpen(false);
   };
 
@@ -69,6 +60,7 @@ export default function HeroReveal({
     href: string
   ) => {
     if (href === "/") {
+      closeMenu();
       return;
     }
 
@@ -76,24 +68,85 @@ export default function HeroReveal({
     const target = document.getElementById(targetId);
 
     if (!target) {
+      closeMenu();
       return;
     }
 
     event.preventDefault();
     closeMenu();
 
+    if (scrollAnimationRef.current !== null) {
+      cancelAnimationFrame(scrollAnimationRef.current);
+      scrollAnimationRef.current = null;
+    }
+
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+
     const start = window.scrollY;
-    const targetTop =
-      target.getBoundingClientRect().top + window.scrollY;
-    // Center every anchor-linked section vertically in the viewport so it
-    // sits in the best possible view (start to end) on both desktop and
-    // mobile, regardless of which nav item was clicked.
-    const targetPosition =
-      targetTop + target.offsetHeight / 2 - window.innerHeight / 2;
+    const targetTop = target.getBoundingClientRect().top + window.scrollY;
+    const viewportHeight = window.innerHeight;
+    const sectionHeight = target.getBoundingClientRect().height;
+
+    /*
+     * Navigation landing rules:
+     *
+     * Books / Work:
+     *   Center the section so the user lands on its strongest overall view.
+     *
+     * About:
+     *   If the editorial copy fits in the viewport, center it. If it is
+     *   taller than the viewport (especially on mobile), show its beginning
+     *   instead of dropping the user into the middle of the text.
+     *
+     * Booking:
+     *   Land at the beginning of the booking area so the heading and the
+     *   start of the Cal.com experience are visible immediately. A booking
+     *   section can be taller than a mobile viewport, so attempting to center
+     *   the entire section would hide its beginning.
+     */
+    let targetPosition: number;
+
+    if (targetId === "books" || targetId === "work") {
+      targetPosition =
+        targetTop + sectionHeight / 2 - viewportHeight / 2;
+    } else if (targetId === "about") {
+      targetPosition =
+        sectionHeight <= viewportHeight * 0.92
+          ? targetTop + sectionHeight / 2 - viewportHeight / 2
+          : targetTop;
+    } else if (targetId === "booking") {
+      targetPosition = targetTop;
+    } else {
+      targetPosition = targetTop;
+    }
+
+    const maxScroll = Math.max(
+      0,
+      document.documentElement.scrollHeight - viewportHeight
+    );
+
+    targetPosition = Math.min(Math.max(targetPosition, 0), maxScroll);
+
+    if (prefersReducedMotion) {
+      window.scrollTo({ top: targetPosition, behavior: "auto" });
+      return;
+    }
+
     const distance = targetPosition - start;
-    // Smooth, medium-paced scroll -- stays snappy on short hops and never
-    // drags on long ones.
-    const duration = Math.min(900, Math.max(600, Math.abs(distance) * 0.35));
+
+    if (Math.abs(distance) < 2) {
+      window.scrollTo({ top: targetPosition, behavior: "auto" });
+      return;
+    }
+
+    // Medium-speed editorial scroll: quick enough to feel responsive, but
+    // long enough to make the destination and section transition readable.
+    const duration = Math.min(
+      900,
+      Math.max(540, 480 + Math.abs(distance) * 0.18)
+    );
     const startTime = performance.now();
 
     const easeInOut = (progress: number) =>
@@ -107,24 +160,25 @@ export default function HeroReveal({
         1
       );
 
-      window.scrollTo(0, start + distance * easeInOut(progress));
+      window.scrollTo({
+        top: start + distance * easeInOut(progress),
+        behavior: "auto",
+      });
 
       if (progress < 1) {
-        requestAnimationFrame(animateScroll);
+        scrollAnimationRef.current = requestAnimationFrame(animateScroll);
+      } else {
+        scrollAnimationRef.current = null;
       }
     };
 
-    requestAnimationFrame(animateScroll);
+    scrollAnimationRef.current = requestAnimationFrame(animateScroll);
   };
 
   return (
     <div className={styles.hero}>
       <div className={styles.heroMedia}>
-        <img
-          src={src}
-          alt={alt}
-          className={styles.heroImage}
-        />
+        <img src={src} alt={alt} className={styles.heroImage} />
       </div>
 
       {/* EA HOME BUTTON */}
@@ -139,24 +193,28 @@ export default function HeroReveal({
       {/* DESKTOP NAVIGATION */}
       <nav className={styles.desktopNavigation} aria-label="Main navigation">
         <a href="/">Home</a>
+
         <a
           href="#books"
           onClick={(event) => handleNavigation(event, "#books")}
         >
           Books
         </a>
+
         <a
           href="#about"
           onClick={(event) => handleNavigation(event, "#about")}
         >
           About
         </a>
+
         <a
           href="#work"
           onClick={(event) => handleNavigation(event, "#work")}
         >
           Contact
         </a>
+
         <a
           href="#booking"
           className={styles.getStartedButton}
@@ -241,10 +299,7 @@ export default function HeroReveal({
                   {item.label}
                 </span>
 
-                <span
-                  className={styles.drawerArrow}
-                  aria-hidden="true"
-                >
+                <span className={styles.drawerArrow} aria-hidden="true">
                   →
                 </span>
               </a>
@@ -254,10 +309,7 @@ export default function HeroReveal({
       </aside>
 
       {/* ROLE TEXT */}
-      <div
-        className={styles.heroRole}
-        aria-label="Romance Ghostwriter"
-      >
+      <div className={styles.heroRole} aria-label="Romance Ghostwriter">
         <span>ROMANCE</span>
         <span>GHOSTWRITER</span>
       </div>
