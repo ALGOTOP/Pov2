@@ -98,7 +98,7 @@
 
   opacity: 0;
 
-  pointer-events: none;
+  pointer-events: auto;
 
   transform: translateY(-4px);
 
@@ -152,7 +152,7 @@
     sans-serif;
 
   opacity: 0;
-  pointer-events: none;
+  pointer-events: auto;
 
   transform: translateY(-4px);
 
@@ -740,12 +740,7 @@
 @keyframes desktopNavigationAppear {
   0% {
     opacity: 0;
-    pointer-events: none;
     transform: translateY(-4px);
-  }
-
-  1% {
-    pointer-events: auto;
   }
 
   100% {
@@ -780,12 +775,7 @@
 @keyframes logoAppear {
   0% {
     opacity: 0;
-    pointer-events: none;
     transform: translateY(-4px);
-  }
-
-  1% {
-    pointer-events: auto;
   }
 
   100% {
