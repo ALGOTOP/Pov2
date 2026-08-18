@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties, type MouseEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type MouseEvent,
+} from "react";
 import styles from "./HeroReveal.module.css";
 
 type HeroRevealProps = {
@@ -15,11 +21,9 @@ const menuItems = [
   { label: "Contact", href: "#work" },
 ];
 
-const SCROLL_DURATION = {
-  min: 520,
-  max: 820,
-  pixelsPerMillisecond: 2.25,
-};
+const SCROLL_MIN_MS = 520;
+const SCROLL_MAX_MS = 820;
+const SCROLL_PX_PER_MS = 2.2;
 
 export default function HeroReveal({
   src = "/hero-photo.jpg",
@@ -29,12 +33,7 @@ export default function HeroReveal({
   const animationFrameRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (!menuOpen) {
-      document.body.style.overflow = "";
-      return;
-    }
-
-    document.body.style.overflow = "hidden";
+    document.body.style.overflow = menuOpen ? "hidden" : "";
 
     return () => {
       document.body.style.overflow = "";
@@ -60,42 +59,38 @@ export default function HeroReveal({
   }, []);
 
   const closeMenu = () => {
-    // Unlock immediately, not on the next React render. This is important
-    // on mobile because the drawer sets body overflow to hidden.
+    // Unlock scrolling immediately before starting a navigation.
     document.body.style.overflow = "";
     setMenuOpen(false);
   };
 
-  const getScrollTarget = (target: HTMLElement, targetId: string) => {
+  const getTargetPosition = (
+    target: HTMLElement,
+    targetId: string
+  ) => {
     const rect = target.getBoundingClientRect();
     const absoluteTop = rect.top + window.scrollY;
-    const height = rect.height;
-    const viewport = window.innerHeight;
+    const sectionHeight = rect.height;
+    const viewportHeight = window.innerHeight;
 
-    /*
-     * The goal is not a generic "scroll to top" for every section.
-     * Each destination gets the most useful reading/viewing position.
-     *
-     * If a section is taller than the viewport, its beginning is the only
-     * position that can reliably show the complete section from its start
-     * rather than dropping the user into its middle.
-     */
-    if (height > viewport) {
+    // If the destination is taller than the viewport, start at its top.
+    // This guarantees the user sees the section from its beginning.
+    if (sectionHeight >= viewportHeight) {
       return absoluteTop;
     }
 
-    // Books: center the complete section in the viewport.
-    if (targetId === "books") {
-      return absoluteTop - Math.max(0, (viewport - height) / 2);
+    // Books and Work: center the complete section.
+    if (targetId === "books" || targetId === "work") {
+      return absoluteTop - (viewportHeight - sectionHeight) / 2;
     }
 
-    // About: place the editorial copy at the top with a small breathing room.
-    if (targetId === "about") {
-      return absoluteTop;
+    // About and Booking: also center when the full destination fits.
+    // Otherwise the top of the section is the most useful position.
+    if (targetId === "about" || targetId === "booking") {
+      return absoluteTop - (viewportHeight - sectionHeight) / 2;
     }
 
-    // Work and booking: center when the full section can fit.
-    return absoluteTop - Math.max(0, (viewport - height) / 2);
+    return absoluteTop;
   };
 
   const handleNavigation = (
@@ -108,13 +103,18 @@ export default function HeroReveal({
 
     event.preventDefault();
 
-    const targetId = href.startsWith("#") ? href.slice(1) : "";
+    const targetId = href.startsWith("#")
+      ? href.substring(1)
+      : "";
+
     if (!targetId) return;
 
     const target = document.getElementById(targetId);
 
     if (!target) {
-      console.warn(`Navigation target "#${targetId}" was not found.`);
+      console.warn(
+        `[HeroReveal] Navigation target not found: #${targetId}`
+      );
       closeMenu();
       return;
     }
@@ -126,25 +126,42 @@ export default function HeroReveal({
       animationFrameRef.current = null;
     }
 
-    const start = window.scrollY;
+    const startPosition = window.scrollY;
     const targetPosition = Math.max(
       0,
-      getScrollTarget(target, targetId)
+      getTargetPosition(target, targetId)
     );
-    const distance = targetPosition - start;
+    const distance = targetPosition - startPosition;
 
     if (Math.abs(distance) < 2) {
-      window.scrollTo(0, targetPosition);
+      window.scrollTo({
+        top: targetPosition,
+        left: 0,
+        behavior: "auto",
+      });
       return;
     }
 
     const duration = Math.min(
-      SCROLL_DURATION.max,
+      SCROLL_MAX_MS,
       Math.max(
-        SCROLL_DURATION.min,
-        Math.abs(distance) / SCROLL_DURATION.pixelsPerMillisecond
+        SCROLL_MIN_MS,
+        Math.abs(distance) / SCROLL_PX_PER_MS
       )
     );
+
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+
+    if (prefersReducedMotion) {
+      window.scrollTo({
+        top: targetPosition,
+        left: 0,
+        behavior: "auto",
+      });
+      return;
+    }
 
     const startTime = performance.now();
 
@@ -153,36 +170,30 @@ export default function HeroReveal({
         ? 2 * progress * progress
         : 1 - Math.pow(-2 * progress + 2, 2) / 2;
 
-    const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
-    ).matches;
-
-    if (prefersReducedMotion) {
-      window.scrollTo(0, targetPosition);
-      return;
-    }
-
-    const animateScroll = (currentTime: number) => {
+    const animate = (currentTime: number) => {
       const progress = Math.min(
-        (currentTime - startTime) / duration,
-        1
+        1,
+        (currentTime - startTime) / duration
       );
 
-      window.scrollTo(
-        0,
-        start + distance * easeInOut(progress)
-      );
+      window.scrollTo({
+        top:
+          startPosition +
+          distance * easeInOut(progress),
+        left: 0,
+        behavior: "auto",
+      });
 
       if (progress < 1) {
         animationFrameRef.current =
-          requestAnimationFrame(animateScroll);
+          requestAnimationFrame(animate);
       } else {
         animationFrameRef.current = null;
       }
     };
 
     animationFrameRef.current =
-      requestAnimationFrame(animateScroll);
+      requestAnimationFrame(animate);
   };
 
   return (
