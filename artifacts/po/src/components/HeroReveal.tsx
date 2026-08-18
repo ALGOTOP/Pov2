@@ -1,4 +1,10 @@
-import { useEffect, useRef, useState, type CSSProperties, type MouseEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type MouseEvent as ReactMouseEvent,
+} from "react";
 import styles from "./HeroReveal.module.css";
 
 type HeroRevealProps = {
@@ -13,151 +19,242 @@ const menuItems = [
   { label: "Contact", href: "#work" },
 ];
 
-const clamp = (value: number, min: number, max: number) =>
-  Math.min(max, Math.max(min, value));
+const getText = (element: Element) =>
+  (element.textContent || "").replace(/\s+/g, " ").trim().toUpperCase();
+
+function findNavigationTarget(id: string): HTMLElement | null {
+  const byId = document.getElementById(id);
+  if (byId instanceof HTMLElement) return byId;
+
+  const sections = Array.from(
+    document.querySelectorAll<HTMLElement>("main section, section")
+  );
+
+  if (id === "books") {
+    return (
+      sections.find((section) =>
+        getText(section.querySelector("h1, h2")) === "BOOKS"
+      ) || null
+    );
+  }
+
+  if (id === "about") {
+    return (
+      sections.find((section) =>
+        getText(section).startsWith("EMAN ALI IS A WORKING GHOSTWRITER")
+      ) || null
+    );
+  }
+
+  if (id === "work") {
+    return (
+      sections.find((section) =>
+        getText(section.querySelector("h1, h2")).includes("WORK WITH EMAN")
+      ) || null
+    );
+  }
+
+  if (id === "booking") {
+    return (
+      sections.find((section) =>
+        getText(section.querySelector("h1, h2")).includes(
+          "SEE IF EMAN IS THE RIGHT FIT"
+        )
+      ) || null
+    );
+  }
+
+  return null;
+}
+
+function scrollToSection(id: string, target: HTMLElement) {
+  const startY = window.scrollY;
+  const rect = target.getBoundingClientRect();
+  const absoluteTop = rect.top + startY;
+  const height = rect.height;
+  const viewport = window.innerHeight;
+
+  let destination: number;
+
+  if (height >= viewport) {
+    // For a section taller than the viewport, always show its beginning.
+    destination = absoluteTop;
+  } else if (id === "about") {
+    // About is editorial copy: start reading from the beginning.
+    destination = absoluteTop;
+  } else {
+    // For Books / Work / Booking, center the complete section when possible.
+    destination = absoluteTop - (viewport - height) / 2;
+  }
+
+  destination = Math.max(0, destination);
+
+  const distance = destination - startY;
+
+  if (Math.abs(distance) < 2) {
+    window.scrollTo(0, destination);
+    return;
+  }
+
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    window.scrollTo(0, destination);
+    return;
+  }
+
+  const duration = Math.min(
+    780,
+    Math.max(440, Math.abs(distance) * 0.26)
+  );
+
+  const startedAt = performance.now();
+
+  const ease = (t: number) =>
+    t < 0.5
+      ? 4 * t * t * t
+      : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+  let frame = 0;
+
+  const tick = (now: number) => {
+    const progress = Math.min(1, (now - startedAt) / duration);
+
+    window.scrollTo(
+      0,
+      startY + distance * ease(progress)
+    );
+
+    if (progress < 1) {
+      frame = requestAnimationFrame(tick);
+    } else {
+      window.scrollTo(0, destination);
+    }
+  };
+
+  frame = requestAnimationFrame(tick);
+
+  return () => cancelAnimationFrame(frame);
+}
 
 export default function HeroReveal({
   src = "/hero-photo.jpg",
   alt = "",
 }: HeroRevealProps) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const scrollFrame = useRef<number | null>(null);
+  const scrollingRef = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    /*
+     * FOUNDATION-LEVEL NAVIGATION HANDLER
+     *
+     * We listen at document level in capture phase instead of relying only
+     * on React's individual anchor onClick handlers. This means navigation
+     * still works if a visual overlay/animation/stacking layer gets between
+     * the pointer and the link.
+     */
+    const handleDocumentClick = (event: Event) => {
+      const target = event.target;
+
+      if (!(target instanceof Element)) return;
+
+      const anchor = target.closest<HTMLAnchorElement>("a[href]");
+      if (!anchor) return;
+
+      const rawHref = anchor.getAttribute("href");
+      if (!rawHref || !rawHref.startsWith("#")) return;
+
+      const id = rawHref.slice(1);
+      if (!id) return;
+
+      const destination = findNavigationTarget(id);
+
+      // If the target genuinely does not exist, allow the browser's normal
+      // hash behavior rather than swallowing the click.
+      if (!destination) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (scrollingRef.current) {
+        scrollingRef.current();
+        scrollingRef.current = null;
+      }
+
+      // Release the mobile drawer's scroll lock synchronously.
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+
+      setMenuOpen(false);
+
+      scrollingRef.current =
+        scrollToSection(id, destination) || null;
+
+      // Keep the URL/hash in sync without allowing the browser to perform
+      // its own instant jump on top of our controlled animation.
+      window.history.replaceState(
+        null,
+        "",
+        `${window.location.pathname}${window.location.search}#${id}`
+      );
+    };
+
+    document.addEventListener("click", handleDocumentClick, true);
+
+    return () => {
+      document.removeEventListener(
+        "click",
+        handleDocumentClick,
+        true
+      );
+
+      if (scrollingRef.current) {
+        scrollingRef.current();
+        scrollingRef.current = null;
+      }
+    };
+  }, []);
 
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "";
+    document.documentElement.style.overflow = menuOpen
+      ? "hidden"
+      : "";
 
     return () => {
       document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
     };
   }, [menuOpen]);
 
   useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
+    const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setMenuOpen(false);
       }
     };
 
-    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      window.removeEventListener("keydown", onKeyDown);
-
-      if (scrollFrame.current !== null) {
-        cancelAnimationFrame(scrollFrame.current);
-      }
+      window.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
 
-  const closeMenuImmediately = () => {
-    // Do this synchronously so the drawer cannot keep body scrolling locked
-    // while the destination animation starts.
+  const closeMenu = () => {
     document.body.style.overflow = "";
+    document.documentElement.style.overflow = "";
     setMenuOpen(false);
   };
 
-  const getDestination = (id: string, element: HTMLElement) => {
-    const rect = element.getBoundingClientRect();
-    const absoluteTop = rect.top + window.scrollY;
-    const sectionHeight = rect.height;
-    const viewportHeight = window.innerHeight;
-
-    // If the complete section cannot fit in the viewport, show its beginning.
-    if (sectionHeight >= viewportHeight) {
-      return absoluteTop;
-    }
-
-    const freeSpace = viewportHeight - sectionHeight;
-
-    // About/editorial: start at the beginning so the copy is read from start.
-    if (id === "about") {
-      return absoluteTop;
-    }
-
-    // Books, Work and Booking: center the complete section.
-    return absoluteTop - freeSpace / 2;
-  };
-
-  const handleNavigation = (
-    event: MouseEvent<HTMLAnchorElement>,
+  const handleDirectNavigation = (
+    event: ReactMouseEvent<HTMLAnchorElement>,
     href: string
   ) => {
-    if (!href.startsWith("#")) {
-      return;
-    }
-
-    event.preventDefault();
-
-    const id = href.substring(1);
-    const target = document.getElementById(id);
-
-    if (!target) {
-      console.warn(`[Navigation] Missing target: #${id}`);
-      closeMenuImmediately();
-      return;
-    }
-
-    closeMenuImmediately();
-
-    if (scrollFrame.current !== null) {
-      cancelAnimationFrame(scrollFrame.current);
-      scrollFrame.current = null;
-    }
-
-    const startY = window.scrollY;
-    const destination = Math.max(0, getDestination(id, target));
-    const distance = destination - startY;
-
-    if (Math.abs(distance) < 2) {
-      window.scrollTo(0, destination);
-      return;
-    }
-
-    if (
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    ) {
-      window.scrollTo(0, destination);
-      return;
-    }
-
-    // Medium speed: short enough to feel responsive, long enough to feel
-    // deliberate. Never becomes a slow cinematic scroll.
-    const duration = clamp(
-      Math.abs(distance) * 0.28,
-      420,
-      760
-    );
-
-    const startTime = performance.now();
-
-    const ease = (t: number) =>
-      t < 0.5
-        ? 4 * t * t * t
-        : 1 - Math.pow(-2 * t + 2, 3) / 2;
-
-    const animate = (now: number) => {
-      const progress = Math.min(
-        1,
-        (now - startTime) / duration
-      );
-
-      window.scrollTo(
-        0,
-        startY + (destination - startY) * ease(progress)
-      );
-
-      if (progress < 1) {
-        scrollFrame.current =
-          requestAnimationFrame(animate);
-      } else {
-        scrollFrame.current = null;
-
-        // Keep the final position exact after the animation.
-        window.scrollTo(0, destination);
-      }
-    };
-
-    scrollFrame.current = requestAnimationFrame(animate);
+    // The document-level capture handler is the single source of truth.
+    // This fallback intentionally does not prevent default.
+    if (!href.startsWith("#")) return;
+    event.currentTarget.dataset.navigationRequested = "true";
   };
 
   return (
@@ -187,7 +284,7 @@ export default function HeroReveal({
         <a
           href="#books"
           onClick={(event) =>
-            handleNavigation(event, "#books")
+            handleDirectNavigation(event, "#books")
           }
         >
           Books
@@ -196,7 +293,7 @@ export default function HeroReveal({
         <a
           href="#about"
           onClick={(event) =>
-            handleNavigation(event, "#about")
+            handleDirectNavigation(event, "#about")
           }
         >
           About
@@ -205,7 +302,7 @@ export default function HeroReveal({
         <a
           href="#work"
           onClick={(event) =>
-            handleNavigation(event, "#work")
+            handleDirectNavigation(event, "#work")
           }
         >
           Contact
@@ -215,7 +312,7 @@ export default function HeroReveal({
           href="#booking"
           className={styles.getStartedButton}
           onClick={(event) =>
-            handleNavigation(event, "#booking")
+            handleDirectNavigation(event, "#booking")
           }
         >
           Get Started
@@ -250,7 +347,7 @@ export default function HeroReveal({
         className={`${styles.menuBackdrop} ${
           menuOpen ? styles.menuBackdropVisible : ""
         }`}
-        onClick={closeMenuImmediately}
+        onClick={closeMenu}
         aria-label="Close menu"
         tabIndex={menuOpen ? 0 : -1}
       />
@@ -265,7 +362,7 @@ export default function HeroReveal({
         <button
           type="button"
           className={styles.drawerClose}
-          onClick={closeMenuImmediately}
+          onClick={closeMenu}
           aria-label="Close menu"
           tabIndex={menuOpen ? 0 : -1}
         >
@@ -291,9 +388,6 @@ export default function HeroReveal({
                   } as CSSProperties
                 }
                 tabIndex={menuOpen ? 0 : -1}
-                onClick={(event) =>
-                  handleNavigation(event, item.href)
-                }
               >
                 <span className={styles.drawerLinkText}>
                   {item.label}
