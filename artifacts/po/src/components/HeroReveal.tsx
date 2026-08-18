@@ -1,10 +1,6 @@
-import {
-  useEffect,
-  useRef,
-  useState,
-  type CSSProperties,
-  type MouseEvent as ReactMouseEvent,
-} from "react";
+"use client";
+
+import { useEffect, useState } from "react";
 import styles from "./HeroReveal.module.css";
 
 type HeroRevealProps = {
@@ -13,217 +9,40 @@ type HeroRevealProps = {
 };
 
 const menuItems = [
-  { label: "Home", href: "/" },
-  { label: "Books", href: "#books" },
-  { label: "About", href: "#about" },
-  { label: "Contact", href: "#work" },
+  {
+    label: "Home",
+    href: "/",
+  },
+  {
+    label: "Books",
+    href: "#books",
+  },
+  {
+    label: "About",
+    href: "#about",
+  },
+  {
+    label: "Contact",
+    href: "#work",
+  },
 ];
-
-const getText = (element: Element) =>
-  (element.textContent || "").replace(/\s+/g, " ").trim().toUpperCase();
-
-function findNavigationTarget(id: string): HTMLElement | null {
-  const byId = document.getElementById(id);
-  if (byId instanceof HTMLElement) return byId;
-
-  const sections = Array.from(
-    document.querySelectorAll<HTMLElement>("main section, section")
-  );
-
-  if (id === "books") {
-    return (
-      sections.find((section) =>
-        getText(section.querySelector("h1, h2")) === "BOOKS"
-      ) || null
-    );
-  }
-
-  if (id === "about") {
-    return (
-      sections.find((section) =>
-        getText(section).startsWith("EMAN ALI IS A WORKING GHOSTWRITER")
-      ) || null
-    );
-  }
-
-  if (id === "work") {
-    return (
-      sections.find((section) =>
-        getText(section.querySelector("h1, h2")).includes("WORK WITH EMAN")
-      ) || null
-    );
-  }
-
-  if (id === "booking") {
-    return (
-      sections.find((section) =>
-        getText(section.querySelector("h1, h2")).includes(
-          "SEE IF EMAN IS THE RIGHT FIT"
-        )
-      ) || null
-    );
-  }
-
-  return null;
-}
-
-function scrollToSection(id: string, target: HTMLElement) {
-  const startY = window.scrollY;
-  const rect = target.getBoundingClientRect();
-  const absoluteTop = rect.top + startY;
-  const height = rect.height;
-  const viewport = window.innerHeight;
-
-  let destination: number;
-
-  if (height >= viewport) {
-    // For a section taller than the viewport, always show its beginning.
-    destination = absoluteTop;
-  } else if (id === "about") {
-    // About is editorial copy: start reading from the beginning.
-    destination = absoluteTop;
-  } else {
-    // For Books / Work / Booking, center the complete section when possible.
-    destination = absoluteTop - (viewport - height) / 2;
-  }
-
-  destination = Math.max(0, destination);
-
-  const distance = destination - startY;
-
-  if (Math.abs(distance) < 2) {
-    window.scrollTo(0, destination);
-    return;
-  }
-
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    window.scrollTo(0, destination);
-    return;
-  }
-
-  const duration = Math.min(
-    780,
-    Math.max(440, Math.abs(distance) * 0.26)
-  );
-
-  const startedAt = performance.now();
-
-  const ease = (t: number) =>
-    t < 0.5
-      ? 4 * t * t * t
-      : 1 - Math.pow(-2 * t + 2, 3) / 2;
-
-  let frame = 0;
-
-  const tick = (now: number) => {
-    const progress = Math.min(1, (now - startedAt) / duration);
-
-    window.scrollTo(
-      0,
-      startY + distance * ease(progress)
-    );
-
-    if (progress < 1) {
-      frame = requestAnimationFrame(tick);
-    } else {
-      window.scrollTo(0, destination);
-    }
-  };
-
-  frame = requestAnimationFrame(tick);
-
-  return () => cancelAnimationFrame(frame);
-}
 
 export default function HeroReveal({
   src = "/hero-photo.jpg",
   alt = "",
 }: HeroRevealProps) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const scrollingRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
-    /*
-     * FOUNDATION-LEVEL NAVIGATION HANDLER
-     *
-     * We listen at document level in capture phase instead of relying only
-     * on React's individual anchor onClick handlers. This means navigation
-     * still works if a visual overlay/animation/stacking layer gets between
-     * the pointer and the link.
-     */
-    const handleDocumentClick = (event: Event) => {
-      const target = event.target;
-
-      if (!(target instanceof Element)) return;
-
-      const anchor = target.closest<HTMLAnchorElement>("a[href]");
-      if (!anchor) return;
-
-      const rawHref = anchor.getAttribute("href");
-      if (!rawHref || !rawHref.startsWith("#")) return;
-
-      const id = rawHref.slice(1);
-      if (!id) return;
-
-      const destination = findNavigationTarget(id);
-
-      // If the target genuinely does not exist, allow the browser's normal
-      // hash behavior rather than swallowing the click.
-      if (!destination) {
-        return;
-      }
-
-      event.preventDefault();
-      event.stopPropagation();
-
-      if (scrollingRef.current) {
-        scrollingRef.current();
-        scrollingRef.current = null;
-      }
-
-      // Release the mobile drawer's scroll lock synchronously.
+    if (!menuOpen) {
       document.body.style.overflow = "";
-      document.documentElement.style.overflow = "";
+      return;
+    }
 
-      setMenuOpen(false);
-
-      scrollingRef.current =
-        scrollToSection(id, destination) || null;
-
-      // Keep the URL/hash in sync without allowing the browser to perform
-      // its own instant jump on top of our controlled animation.
-      window.history.replaceState(
-        null,
-        "",
-        `${window.location.pathname}${window.location.search}#${id}`
-      );
-    };
-
-    document.addEventListener("click", handleDocumentClick, true);
-
-    return () => {
-      document.removeEventListener(
-        "click",
-        handleDocumentClick,
-        true
-      );
-
-      if (scrollingRef.current) {
-        scrollingRef.current();
-        scrollingRef.current = null;
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    document.body.style.overflow = menuOpen ? "hidden" : "";
-    document.documentElement.style.overflow = menuOpen
-      ? "hidden"
-      : "";
+    document.body.style.overflow = "hidden";
 
     return () => {
       document.body.style.overflow = "";
-      document.documentElement.style.overflow = "";
     };
   }, [menuOpen]);
 
@@ -242,19 +61,89 @@ export default function HeroReveal({
   }, []);
 
   const closeMenu = () => {
-    document.body.style.overflow = "";
-    document.documentElement.style.overflow = "";
     setMenuOpen(false);
   };
 
-  const handleDirectNavigation = (
-    event: ReactMouseEvent<HTMLAnchorElement>,
+  const handleNavigation = (
+    event: React.MouseEvent<HTMLAnchorElement>,
     href: string
   ) => {
-    // The document-level capture handler is the single source of truth.
-    // This fallback intentionally does not prevent default.
-    if (!href.startsWith("#")) return;
-    event.currentTarget.dataset.navigationRequested = "true";
+    if (!href.startsWith("#")) {
+      return;
+    }
+
+    event.preventDefault();
+
+    const targetId = href.substring(1);
+    const target = document.getElementById(targetId);
+
+    if (!target) {
+      console.warn(`Navigation target not found: #${targetId}`);
+      return;
+    }
+
+    closeMenu();
+
+    const startY = window.scrollY;
+    const rect = target.getBoundingClientRect();
+    const absoluteTop = rect.top + startY;
+    const sectionHeight = target.offsetHeight;
+    const viewportHeight = window.innerHeight;
+
+    let targetY = absoluteTop;
+
+    // About: begin at the start so the editorial text can be read from top.
+    if (targetId === "about") {
+      targetY = absoluteTop;
+    }
+    // Books, Work and Booking: center the complete section when it fits.
+    else if (sectionHeight <= viewportHeight) {
+      targetY = absoluteTop - (viewportHeight - sectionHeight) / 2;
+    }
+
+    targetY = Math.max(0, targetY);
+
+    const distance = targetY - startY;
+    const duration = Math.min(
+      800,
+      Math.max(500, Math.abs(distance) * 0.3)
+    );
+
+    const startTime = performance.now();
+
+    const ease = (t: number) =>
+      t < 0.5
+        ? 4 * t * t * t
+        : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+    if (
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      window.scrollTo(0, targetY);
+      return;
+    }
+
+    const animate = (now: number) => {
+      const progress = Math.min(
+        1,
+        (now - startTime) / duration
+      );
+
+      window.scrollTo(
+        0,
+        startY + distance * ease(progress)
+      );
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
+    };
+
+    requestAnimationFrame(animate);
+
+    // Keep the correct section in the URL without allowing the browser
+    // to perform its own abrupt anchor jump.
+    window.history.replaceState(null, "", `#${targetId}`);
   };
 
   return (
@@ -267,6 +156,7 @@ export default function HeroReveal({
         />
       </div>
 
+      {/* EA HOME BUTTON */}
       <a
         href="/"
         className={styles.logo}
@@ -275,50 +165,37 @@ export default function HeroReveal({
         EA
       </a>
 
-      <nav
-        className={styles.desktopNavigation}
-        aria-label="Main navigation"
-      >
+      {/* DESKTOP NAVIGATION */}
+      <nav className={styles.desktopNavigation} aria-label="Main navigation">
         <a href="/">Home</a>
-
         <a
           href="#books"
-          onClick={(event) =>
-            handleDirectNavigation(event, "#books")
-          }
+          onClick={(event) => handleNavigation(event, "#books")}
         >
           Books
         </a>
-
         <a
           href="#about"
-          onClick={(event) =>
-            handleDirectNavigation(event, "#about")
-          }
+          onClick={(event) => handleNavigation(event, "#about")}
         >
           About
         </a>
-
         <a
           href="#work"
-          onClick={(event) =>
-            handleDirectNavigation(event, "#work")
-          }
+          onClick={(event) => handleNavigation(event, "#work")}
         >
           Contact
         </a>
-
         <a
           href="#booking"
           className={styles.getStartedButton}
-          onClick={(event) =>
-            handleDirectNavigation(event, "#booking")
-          }
+          onClick={(event) => handleNavigation(event, "#booking")}
         >
           Get Started
         </a>
       </nav>
 
+      {/* MOBILE / TABLET MENU BUTTON */}
       <button
         type="button"
         className={`${styles.menuButton} ${
@@ -342,6 +219,7 @@ export default function HeroReveal({
         </span>
       </button>
 
+      {/* MENU BACKDROP */}
       <button
         type="button"
         className={`${styles.menuBackdrop} ${
@@ -352,6 +230,7 @@ export default function HeroReveal({
         tabIndex={menuOpen ? 0 : -1}
       />
 
+      {/* MENU DRAWER */}
       <aside
         id="site-navigation"
         className={`${styles.menuDrawer} ${
@@ -366,10 +245,7 @@ export default function HeroReveal({
           aria-label="Close menu"
           tabIndex={menuOpen ? 0 : -1}
         >
-          <span
-            className={styles.drawerCloseIcon}
-            aria-hidden="true"
-          />
+          <span className={styles.drawerCloseIcon} aria-hidden="true" />
         </button>
 
         <div className={styles.drawerInner}>
@@ -385,9 +261,10 @@ export default function HeroReveal({
                 style={
                   {
                     "--menu-index": index,
-                  } as CSSProperties
+                  } as React.CSSProperties
                 }
                 tabIndex={menuOpen ? 0 : -1}
+                onClick={(event) => handleNavigation(event, item.href)}
               >
                 <span className={styles.drawerLinkText}>
                   {item.label}
@@ -405,6 +282,7 @@ export default function HeroReveal({
         </div>
       </aside>
 
+      {/* ROLE TEXT */}
       <div
         className={styles.heroRole}
         aria-label="Romance Ghostwriter"
@@ -413,6 +291,7 @@ export default function HeroReveal({
         <span>GHOSTWRITER</span>
       </div>
 
+      {/* LARGE NAME */}
       <div className={styles.heroName} aria-label="Eman Ali">
         EMAN ALI
       </div>
