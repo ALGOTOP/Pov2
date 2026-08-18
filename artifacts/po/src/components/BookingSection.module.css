@@ -12,7 +12,7 @@
 
 .inner {
   display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(520px, 1.1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 440px);
   align-items: center;
   gap: clamp(56px, 8vw, 132px);
   width: min(1380px, calc(100% - 6.64vw));
@@ -114,13 +114,15 @@
 .calendarColumn {
   min-width: 0;
   width: 100%;
+  max-width: 440px;
+  margin-left: auto;
 }
 
 .calendar {
   position: relative;
   width: 100%;
-  min-height: 650px;
-  height: 650px;
+  min-height: 600px;
+  height: 600px;
   overflow: visible;
 }
 
@@ -132,8 +134,8 @@
 .calendar iframe {
   display: block;
   width: 100% !important;
-  height: 650px !important;
-  min-height: 650px !important;
+  height: 600px !important;
+  min-height: 600px !important;
   border: 0 !important;
 }
 
@@ -161,14 +163,19 @@
     max-width: 570px;
   }
 
+  .calendarColumn {
+    max-width: 440px;
+    margin: 0 auto;
+  }
+
   .calendar {
-    height: 680px;
-    min-height: 680px;
+    height: 600px;
+    min-height: 600px;
   }
 
   .calendar iframe {
-    height: 680px !important;
-    min-height: 680px !important;
+    height: 600px !important;
+    min-height: 600px !important;
   }
 }
 
@@ -200,13 +207,17 @@
     font-size: 12px;
   }
 
+  .calendarColumn {
+    max-width: 100%;
+  }
+
   .calendar {
-    height: 680px;
-    min-height: 680px;
+    height: 600px;
+    min-height: 600px;
   }
 
   .calendar iframe {
-    height: 680px !important;
-    min-height: 680px !important;
+    height: 600px !important;
+    min-height: 600px !important;
   }
 }
