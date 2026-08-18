@@ -85,12 +85,15 @@ export default function HeroReveal({
     const start = window.scrollY;
     const targetTop =
       target.getBoundingClientRect().top + window.scrollY;
+    // Center every anchor-linked section vertically in the viewport so it
+    // sits in the best possible view (start to end) on both desktop and
+    // mobile, regardless of which nav item was clicked.
     const targetPosition =
-      targetId === "books" || targetId === "work"
-        ? targetTop + target.offsetHeight / 2 - window.innerHeight / 2
-        : targetTop;
+      targetTop + target.offsetHeight / 2 - window.innerHeight / 2;
     const distance = targetPosition - start;
-    const duration = Math.min(760, Math.max(520, Math.abs(distance) * 0.32));
+    // Smooth, medium-paced scroll -- stays snappy on short hops and never
+    // drags on long ones.
+    const duration = Math.min(900, Math.max(600, Math.abs(distance) * 0.35));
     const startTime = performance.now();
 
     const easeInOut = (progress: number) =>
@@ -155,9 +158,9 @@ export default function HeroReveal({
           Contact
         </a>
         <a
-          href="#work"
+          href="#booking"
           className={styles.getStartedButton}
-          onClick={(event) => handleNavigation(event, "#work")}
+          onClick={(event) => handleNavigation(event, "#booking")}
         >
           Get Started
         </a>
