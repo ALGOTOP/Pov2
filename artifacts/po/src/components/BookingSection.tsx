@@ -94,7 +94,7 @@ export default function BookingSection() {
           background: "transparent",
         },
       },
-      hideEventTypeDetails: false,
+      hideEventTypeDetails: true,
       theme: "dark",
     });
 
