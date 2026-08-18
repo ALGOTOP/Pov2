@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties, type MouseEvent } from "react";
 import styles from "./HeroReveal.module.css";
 
 type HeroRevealProps = {
@@ -9,23 +9,64 @@ type HeroRevealProps = {
 };
 
 const menuItems = [
-  {
-    label: "Home",
-    href: "/",
-  },
-  {
-    label: "Books",
-    href: "#books",
-  },
-  {
-    label: "About",
-    href: "#about",
-  },
-  {
-    label: "Contact",
-    href: "#work",
-  },
+  { label: "Home", href: "/" },
+  { label: "Books", href: "#books" },
+  { label: "About", href: "#about" },
+  { label: "Contact", href: "#work" },
 ];
+
+function scrollToSection(id: string) {
+  const target = document.getElementById(id);
+
+  if (!target) {
+    console.warn(`[HeroReveal] Navigation target #${id} was not found.`);
+    return false;
+  }
+
+  const viewportHeight = window.innerHeight;
+  const targetHeight = target.getBoundingClientRect().height;
+
+  /*
+   * A section taller than the viewport cannot be shown completely.
+   * In that case, start at its beginning.
+   *
+   * For shorter sections, center the whole section in the viewport.
+   * About is intentionally aligned to the beginning because it is a
+   * reading section and the user should see its first line immediately.
+   */
+  const block =
+    id === "about" || targetHeight > viewportHeight
+      ? "start"
+      : "center";
+
+  if (
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  ) {
+    target.scrollIntoView({
+      behavior: "auto",
+      block,
+      inline: "nearest",
+    });
+  } else {
+    target.scrollIntoView({
+      behavior: "smooth",
+      block,
+      inline: "nearest",
+    });
+  }
+
+  /*
+   * Keep the URL useful without allowing the browser to perform a second
+   * native hash jump. The scroll above is the only navigation movement.
+   */
+  window.history.replaceState(
+    null,
+    "",
+    `${window.location.pathname}${window.location.search}#${id}`
+  );
+
+  return true;
+}
 
 export default function HeroReveal({
   src = "/hero-photo.jpg",
@@ -34,12 +75,7 @@ export default function HeroReveal({
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    if (!menuOpen) {
-      document.body.style.overflow = "";
-      return;
-    }
-
-    document.body.style.overflow = "hidden";
+    document.body.style.overflow = menuOpen ? "hidden" : "";
 
     return () => {
       document.body.style.overflow = "";
@@ -60,12 +96,18 @@ export default function HeroReveal({
     };
   }, []);
 
-  const closeMenu = () => {
+  const closeMenuForNavigation = () => {
+    /*
+     * Release the mobile drawer's scroll lock synchronously.
+     * React state updates are asynchronous; waiting for the effect here can
+     * otherwise leave the document locked while scrollIntoView runs.
+     */
+    document.body.style.overflow = "";
     setMenuOpen(false);
   };
 
   const handleNavigation = (
-    event: React.MouseEvent<HTMLAnchorElement>,
+    event: MouseEvent<HTMLAnchorElement>,
     href: string
   ) => {
     if (!href.startsWith("#")) {
@@ -74,76 +116,19 @@ export default function HeroReveal({
 
     event.preventDefault();
 
-    const targetId = href.substring(1);
-    const target = document.getElementById(targetId);
+    const id = href.slice(1);
 
-    if (!target) {
-      console.warn(`Navigation target not found: #${targetId}`);
-      return;
-    }
+    closeMenuForNavigation();
 
-    closeMenu();
-
-    const startY = window.scrollY;
-    const rect = target.getBoundingClientRect();
-    const absoluteTop = rect.top + startY;
-    const sectionHeight = target.offsetHeight;
-    const viewportHeight = window.innerHeight;
-
-    let targetY = absoluteTop;
-
-    // About: begin at the start so the editorial text can be read from top.
-    if (targetId === "about") {
-      targetY = absoluteTop;
-    }
-    // Books, Work and Booking: center the complete section when it fits.
-    else if (sectionHeight <= viewportHeight) {
-      targetY = absoluteTop - (viewportHeight - sectionHeight) / 2;
-    }
-
-    targetY = Math.max(0, targetY);
-
-    const distance = targetY - startY;
-    const duration = Math.min(
-      800,
-      Math.max(500, Math.abs(distance) * 0.3)
-    );
-
-    const startTime = performance.now();
-
-    const ease = (t: number) =>
-      t < 0.5
-        ? 4 * t * t * t
-        : 1 - Math.pow(-2 * t + 2, 3) / 2;
-
-    if (
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    ) {
-      window.scrollTo(0, targetY);
-      return;
-    }
-
-    const animate = (now: number) => {
-      const progress = Math.min(
-        1,
-        (now - startTime) / duration
-      );
-
-      window.scrollTo(
-        0,
-        startY + distance * ease(progress)
-      );
-
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      }
-    };
-
-    requestAnimationFrame(animate);
-
-    // Keep the correct section in the URL without allowing the browser
-    // to perform its own abrupt anchor jump.
-    window.history.replaceState(null, "", `#${targetId}`);
+    /*
+     * Wait one frame after closing the drawer so its fixed overlay/drawer
+     * cannot interfere with the scroll operation on mobile.
+     */
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        scrollToSection(id);
+      });
+    });
   };
 
   return (
@@ -156,7 +141,6 @@ export default function HeroReveal({
         />
       </div>
 
-      {/* EA HOME BUTTON */}
       <a
         href="/"
         className={styles.logo}
@@ -165,37 +149,50 @@ export default function HeroReveal({
         EA
       </a>
 
-      {/* DESKTOP NAVIGATION */}
-      <nav className={styles.desktopNavigation} aria-label="Main navigation">
+      <nav
+        className={styles.desktopNavigation}
+        aria-label="Main navigation"
+      >
         <a href="/">Home</a>
+
         <a
           href="#books"
-          onClick={(event) => handleNavigation(event, "#books")}
+          onClick={(event) =>
+            handleNavigation(event, "#books")
+          }
         >
           Books
         </a>
+
         <a
           href="#about"
-          onClick={(event) => handleNavigation(event, "#about")}
+          onClick={(event) =>
+            handleNavigation(event, "#about")
+          }
         >
           About
         </a>
+
         <a
           href="#work"
-          onClick={(event) => handleNavigation(event, "#work")}
+          onClick={(event) =>
+            handleNavigation(event, "#work")
+          }
         >
           Contact
         </a>
+
         <a
           href="#booking"
           className={styles.getStartedButton}
-          onClick={(event) => handleNavigation(event, "#booking")}
+          onClick={(event) =>
+            handleNavigation(event, "#booking")
+          }
         >
           Get Started
         </a>
       </nav>
 
-      {/* MOBILE / TABLET MENU BUTTON */}
       <button
         type="button"
         className={`${styles.menuButton} ${
@@ -219,18 +216,16 @@ export default function HeroReveal({
         </span>
       </button>
 
-      {/* MENU BACKDROP */}
       <button
         type="button"
         className={`${styles.menuBackdrop} ${
           menuOpen ? styles.menuBackdropVisible : ""
         }`}
-        onClick={closeMenu}
+        onClick={() => setMenuOpen(false)}
         aria-label="Close menu"
         tabIndex={menuOpen ? 0 : -1}
       />
 
-      {/* MENU DRAWER */}
       <aside
         id="site-navigation"
         className={`${styles.menuDrawer} ${
@@ -241,11 +236,14 @@ export default function HeroReveal({
         <button
           type="button"
           className={styles.drawerClose}
-          onClick={closeMenu}
+          onClick={() => setMenuOpen(false)}
           aria-label="Close menu"
           tabIndex={menuOpen ? 0 : -1}
         >
-          <span className={styles.drawerCloseIcon} aria-hidden="true" />
+          <span
+            className={styles.drawerCloseIcon}
+            aria-hidden="true"
+          />
         </button>
 
         <div className={styles.drawerInner}>
@@ -261,10 +259,12 @@ export default function HeroReveal({
                 style={
                   {
                     "--menu-index": index,
-                  } as React.CSSProperties
+                  } as CSSProperties
                 }
                 tabIndex={menuOpen ? 0 : -1}
-                onClick={(event) => handleNavigation(event, item.href)}
+                onClick={(event) =>
+                  handleNavigation(event, item.href)
+                }
               >
                 <span className={styles.drawerLinkText}>
                   {item.label}
@@ -282,7 +282,6 @@ export default function HeroReveal({
         </div>
       </aside>
 
-      {/* ROLE TEXT */}
       <div
         className={styles.heroRole}
         aria-label="Romance Ghostwriter"
@@ -291,7 +290,6 @@ export default function HeroReveal({
         <span>GHOSTWRITER</span>
       </div>
 
-      {/* LARGE NAME */}
       <div className={styles.heroName} aria-label="Eman Ali">
         EMAN ALI
       </div>
